@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from ossguard.analyzers.dep_health import DepHealthReport, DepHealthResult, analyze_dependencies
+from ossguard.analyzers.dep_health import DepHealthResult, analyze_dependencies
 from ossguard.apis.deps_dev import DepsDevClient
-from ossguard.parsers.dependencies import Dependency, parse_dependencies
+from ossguard.parsers.dependencies import parse_dependencies
 
 
 @dataclass

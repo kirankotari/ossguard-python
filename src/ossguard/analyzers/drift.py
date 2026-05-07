@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 from ossguard.apis.osv import OSVClient, VulnInfo
 from ossguard.parsers.dependencies import Dependency
-from ossguard.parsers.sbom import SBOMInfo, parse_sbom
+from ossguard.parsers.sbom import parse_sbom
 
 
 @dataclass

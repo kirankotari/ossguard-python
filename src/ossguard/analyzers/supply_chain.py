@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from ossguard.apis.osv import OSVClient, VulnInfo
+from ossguard.apis.osv import OSVClient
 from ossguard.parsers.dependencies import Dependency, parse_dependencies
 
 

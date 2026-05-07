@@ -1,13 +1,10 @@
 """Tests for the project detector."""
 
 import json
-import os
-import tempfile
-from pathlib import Path
 
 import pytest
 
-from ossguard.detector import ProjectInfo, detect_project
+from ossguard.detector import detect_project
 
 
 @pytest.fixture

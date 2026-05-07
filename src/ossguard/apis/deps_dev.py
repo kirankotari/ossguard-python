@@ -125,7 +125,7 @@ class DepsDevClient:
         license_str = ", ".join(licenses) if licenses else ""
 
         # Extract links
-        links = {l.get("label", ""): l.get("url", "") for l in data.get("links", [])}
+        links = {lnk.get("label", ""): lnk.get("url", "") for lnk in data.get("links", [])}
 
         info = PackageInfo(
             name=name,

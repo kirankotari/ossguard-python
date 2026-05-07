@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from ossguard.apis.deps_dev import DepsDevClient
 from ossguard.parsers.dependencies import Dependency
@@ -34,10 +33,10 @@ class TPNReport:
     def to_text(self) -> str:
         """Generate plain-text third-party notice."""
         lines = [
-            f"THIRD-PARTY SOFTWARE NOTICES AND INFORMATION",
+            "THIRD-PARTY SOFTWARE NOTICES AND INFORMATION",
             f"Project: {self.project_name}",
-            f"",
-            f"This project incorporates components from the projects listed below.",
+            "",
+            "This project incorporates components from the projects listed below.",
             f"{'=' * 72}",
             "",
         ]
@@ -227,7 +226,7 @@ def _detect_conflicts(licenses: dict[str, str]) -> list[str]:
                 break
 
     if has_copyleft and has_permissive:
-        copyleft_names = ", ".join(f"{n} ({l})" for n, l in has_copyleft[:3])
+        copyleft_names = ", ".join(f"{n} ({lic})" for n, lic in has_copyleft[:3])
         conflicts.append(
             f"Copyleft licenses detected alongside permissive: {copyleft_names}. "
             "Review compatibility with your project license."

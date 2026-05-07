@@ -5,7 +5,7 @@ import json
 import pytest
 
 from ossguard.parsers.dependencies import Dependency, parse_dependencies
-from ossguard.parsers.sbom import SBOMInfo, parse_sbom
+from ossguard.parsers.sbom import parse_sbom
 
 
 class TestDependencyParser:

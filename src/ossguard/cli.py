@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import typer
-from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -1127,8 +1125,8 @@ def license_check(
             "unknown_count": len(report_data.unknown_licenses),
             "conflict_count": len(report_data.conflicts),
             "licenses": [
-                {"name": l.name, "version": l.version, "license": l.license, "category": l.category}
-                for l in report_data.licenses
+                {"name": lic.name, "version": lic.version, "license": lic.license, "category": lic.category}
+                for lic in report_data.licenses
             ],
         }
         console.print_json(json_mod.dumps(data))
@@ -1155,7 +1153,7 @@ def license_check(
     console.print(table)
 
     # Summary
-    console.print(f"\n[bold]License Summary:[/]")
+    console.print("\n[bold]License Summary:[/]")
     for cat, count in sorted(report_data.summary.items()):
         if count > 0:
             c_color = cat_colors.get(cat, "white")
@@ -1465,7 +1463,7 @@ def slsa(
         table.add_row(str(r.level), r.description, status_icon.get(r.status, r.status))
 
     console.print(table)
-    console.print(f"\n[dim]Learn more:[/] [cyan]https://slsa.dev/spec/v1.0/levels[/]")
+    console.print("\n[dim]Learn more:[/] [cyan]https://slsa.dev/spec/v1.0/levels[/]")
 
 
 @app.command(name="sbom-gen")
@@ -1810,7 +1808,7 @@ def maturity(
         table.add_row(p.id, str(p.level), p.description, status_icon.get(p.status, p.status))
 
     console.print(table)
-    console.print(f"\n[dim]Learn more:[/] [cyan]https://github.com/ossf/s2c2f[/]")
+    console.print("\n[dim]Learn more:[/] [cyan]https://github.com/ossf/s2c2f[/]")
 
 
 @app.command()
@@ -1876,7 +1874,7 @@ def fuzz(
                 console.print(f"  [blue]>[/] {f.description}")
 
     if not report.has_fuzzing:
-        console.print(f"\n[dim]Generate a starter harness:[/] [cyan]ossguard fuzz --generate[/]")
+        console.print("\n[dim]Generate a starter harness:[/] [cyan]ossguard fuzz --generate[/]")
 
 
 @app.command()

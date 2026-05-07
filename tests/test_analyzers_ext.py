@@ -1,13 +1,10 @@
 """Tests for extended analyzers (audit, fix, badge, ci, report, policy, license)."""
 
 import json
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from ossguard.apis.deps_dev import PackageInfo
-from ossguard.apis.osv import VulnInfo
 from ossguard.parsers.dependencies import Dependency
 
 

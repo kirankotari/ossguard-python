@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 
-from ossguard.apis.deps_dev import DepsDevClient, PackageInfo
+from ossguard.apis.deps_dev import DepsDevClient
 from ossguard.parsers.dependencies import Dependency
 
 
@@ -173,8 +172,8 @@ def _detect_conflicts(
     if not project_license:
         # Can't check compatibility without knowing the project license
         # But we can still detect obviously problematic combinations
-        copyleft_deps = [l for l in licenses if l.category == "copyleft"]
-        permissive_deps = [l for l in licenses if l.category == "permissive"]
+        copyleft_deps = [lic for lic in licenses if lic.category == "copyleft"]
+        permissive_deps = [lic for lic in licenses if lic.category == "permissive"]
 
         if copyleft_deps and permissive_deps:
             for cp in copyleft_deps[:3]:

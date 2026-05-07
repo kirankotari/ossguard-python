@@ -31,7 +31,7 @@ def generate_codeql_workflow(languages: list[str]) -> str | None:
     if not codeql_langs:
         return None
 
-    language_list = ", ".join(f"'{l}'" for l in sorted(codeql_langs))
+    language_list = ", ".join(f"'{lang}'" for lang in sorted(codeql_langs))
 
     return f"""# CodeQL Analysis - Automated code scanning for security vulnerabilities
 # https://docs.github.com/en/code-security/code-scanning

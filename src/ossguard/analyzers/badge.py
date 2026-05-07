@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ossguard.detector import ProjectInfo, detect_project
-from ossguard.parsers.dependencies import parse_dependencies
 
 
 @dataclass
@@ -88,7 +87,6 @@ def assess_badge_readiness(project_path: str | Path) -> BadgeReport:
     met = sum(1 for c in criteria if c.status == "met")
     unmet = sum(1 for c in criteria if c.status == "unmet")
     unknown = sum(1 for c in criteria if c.status == "unknown")
-    total_assessable = met + unmet
     readiness = (met / len(criteria) * 100) if criteria else 0.0
 
     return BadgeReport(
