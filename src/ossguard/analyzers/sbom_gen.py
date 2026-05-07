@@ -43,21 +43,25 @@ def _generate_spdx(project_name: str, deps: list[Dependency]) -> str:
 
     # Root package
     root_spdx_id = "SPDXRef-RootPackage"
-    packages.append({
-        "SPDXID": root_spdx_id,
-        "name": project_name,
-        "versionInfo": "",
-        "downloadLocation": "NOASSERTION",
-        "filesAnalyzed": False,
-        "supplier": "NOASSERTION",
-        "primaryPackagePurpose": "APPLICATION",
-    })
+    packages.append(
+        {
+            "SPDXID": root_spdx_id,
+            "name": project_name,
+            "versionInfo": "",
+            "downloadLocation": "NOASSERTION",
+            "filesAnalyzed": False,
+            "supplier": "NOASSERTION",
+            "primaryPackagePurpose": "APPLICATION",
+        }
+    )
 
-    relationships.append({
-        "spdxElementId": "SPDXRef-DOCUMENT",
-        "relatedSpdxElement": root_spdx_id,
-        "relationshipType": "DESCRIBES",
-    })
+    relationships.append(
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": root_spdx_id,
+            "relationshipType": "DESCRIBES",
+        }
+    )
 
     for i, dep in enumerate(deps):
         spdx_id = f"SPDXRef-Package-{i}"
@@ -72,19 +76,23 @@ def _generate_spdx(project_name: str, deps: list[Dependency]) -> str:
             "supplier": "NOASSERTION",
         }
         if purl:
-            pkg["externalRefs"] = [{
-                "referenceCategory": "PACKAGE-MANAGER",
-                "referenceType": "purl",
-                "referenceLocator": purl,
-            }]
+            pkg["externalRefs"] = [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceType": "purl",
+                    "referenceLocator": purl,
+                }
+            ]
         packages.append(pkg)
 
         rel_type = "DEV_DEPENDENCY_OF" if dep.is_dev else "DEPENDENCY_OF"
-        relationships.append({
-            "spdxElementId": spdx_id,
-            "relatedSpdxElement": root_spdx_id,
-            "relationshipType": rel_type,
-        })
+        relationships.append(
+            {
+                "spdxElementId": spdx_id,
+                "relatedSpdxElement": root_spdx_id,
+                "relationshipType": rel_type,
+            }
+        )
 
     sbom = {
         "spdxVersion": "SPDX-2.3",
@@ -137,16 +145,21 @@ def _generate_cyclonedx(project_name: str, deps: list[Dependency]) -> str:
 
         components.append(comp)
 
-        dependencies_list.append({
-            "ref": comp["bom-ref"],
-            "dependsOn": [],
-        })
+        dependencies_list.append(
+            {
+                "ref": comp["bom-ref"],
+                "dependsOn": [],
+            }
+        )
 
     # Root dependency
-    dependencies_list.insert(0, {
-        "ref": root_ref,
-        "dependsOn": [c.get("bom-ref", "") for c in components],
-    })
+    dependencies_list.insert(
+        0,
+        {
+            "ref": root_ref,
+            "dependsOn": [c.get("bom-ref", "") for c in components],
+        },
+    )
 
     sbom = {
         "bomFormat": "CycloneDX",

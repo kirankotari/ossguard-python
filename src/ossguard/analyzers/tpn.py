@@ -126,23 +126,26 @@ tr:nth-child(even) {{ background: #fafafa; }}
 
     def to_json(self) -> str:
         """Generate JSON third-party notice."""
-        return json.dumps({
-            "project": self.project_name,
-            "total_components": len(self.entries),
-            "unknown_licenses": self.unknown_licenses,
-            "conflicts": self.conflicts,
-            "components": [
-                {
-                    "name": e.name,
-                    "version": e.version,
-                    "license": e.license,
-                    "homepage": e.homepage,
-                    "repo_url": e.repo_url,
-                    "ecosystem": e.ecosystem,
-                }
-                for e in sorted(self.entries, key=lambda x: x.name.lower())
-            ],
-        }, indent=2)
+        return json.dumps(
+            {
+                "project": self.project_name,
+                "total_components": len(self.entries),
+                "unknown_licenses": self.unknown_licenses,
+                "conflicts": self.conflicts,
+                "components": [
+                    {
+                        "name": e.name,
+                        "version": e.version,
+                        "license": e.license,
+                        "homepage": e.homepage,
+                        "repo_url": e.repo_url,
+                        "ecosystem": e.ecosystem,
+                    }
+                    for e in sorted(self.entries, key=lambda x: x.name.lower())
+                ],
+            },
+            indent=2,
+        )
 
 
 # Known copyleft licenses that may conflict with permissive licenses
@@ -182,14 +185,16 @@ def generate_tpn(
             homepage = info.homepage if info else ""
             repo_url = info.repo_url if info else ""
 
-            entries.append(ThirdPartyEntry(
-                name=dep.name,
-                version=dep.version,
-                license=license_str,
-                homepage=homepage,
-                repo_url=repo_url,
-                ecosystem=dep.ecosystem,
-            ))
+            entries.append(
+                ThirdPartyEntry(
+                    name=dep.name,
+                    version=dep.version,
+                    license=license_str,
+                    homepage=homepage,
+                    repo_url=repo_url,
+                    ecosystem=dep.ecosystem,
+                )
+            )
 
             if not license_str:
                 unknown.append(dep.name)

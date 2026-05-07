@@ -34,23 +34,26 @@ class PolicyReport:
     compliant: bool = False
 
     def to_json(self) -> str:
-        return json.dumps({
-            "policy_file": self.policy_file,
-            "compliant": self.compliant,
-            "passed": self.passed,
-            "failed": self.failed,
-            "warnings": self.warnings,
-            "rules": [
-                {
-                    "id": r.id,
-                    "description": r.description,
-                    "severity": r.severity,
-                    "passed": r.passed,
-                    "details": r.details,
-                }
-                for r in self.rules
-            ],
-        }, indent=2)
+        return json.dumps(
+            {
+                "policy_file": self.policy_file,
+                "compliant": self.compliant,
+                "passed": self.passed,
+                "failed": self.failed,
+                "warnings": self.warnings,
+                "rules": [
+                    {
+                        "id": r.id,
+                        "description": r.description,
+                        "severity": r.severity,
+                        "passed": r.passed,
+                        "details": r.details,
+                    }
+                    for r in self.rules
+                ],
+            },
+            indent=2,
+        )
 
 
 # Default policy rules (used when no policy file is provided)
@@ -58,16 +61,34 @@ DEFAULT_POLICY = {
     "name": "OSSGuard Default Security Policy",
     "rules": {
         "require_security_md": {"severity": "error", "description": "SECURITY.md must exist"},
-        "require_scorecard": {"severity": "warning", "description": "Scorecard workflow should be configured"},
+        "require_scorecard": {
+            "severity": "warning",
+            "description": "Scorecard workflow should be configured",
+        },
         "require_dependabot": {"severity": "error", "description": "Dependabot must be configured"},
         "require_codeql": {"severity": "warning", "description": "CodeQL should be configured"},
-        "require_sbom": {"severity": "warning", "description": "SBOM generation should be configured"},
+        "require_sbom": {
+            "severity": "warning",
+            "description": "SBOM generation should be configured",
+        },
         "require_sigstore": {"severity": "info", "description": "Release signing recommended"},
         "require_license": {"severity": "error", "description": "LICENSE file must exist"},
         "require_readme": {"severity": "error", "description": "README.md must exist"},
-        "max_critical_vulns": {"severity": "error", "value": 0, "description": "No critical vulnerabilities allowed"},
-        "max_high_vulns": {"severity": "warning", "value": 3, "description": "At most 3 high-severity vulnerabilities"},
-        "min_health_score": {"severity": "warning", "value": 6.0, "description": "Minimum dependency health score of 6.0"},
+        "max_critical_vulns": {
+            "severity": "error",
+            "value": 0,
+            "description": "No critical vulnerabilities allowed",
+        },
+        "max_high_vulns": {
+            "severity": "warning",
+            "value": 3,
+            "description": "At most 3 high-severity vulnerabilities",
+        },
+        "min_health_score": {
+            "severity": "warning",
+            "value": 6.0,
+            "description": "Minimum dependency health score of 6.0",
+        },
     },
 }
 
@@ -113,13 +134,15 @@ def check_policy(
         description = config.get("description", rule_id)
         passed, details = _check_rule(rule_id, config, info, dep_report, path)
 
-        rules.append(PolicyRule(
-            id=rule_id,
-            description=description,
-            severity=severity,
-            passed=passed,
-            details=details,
-        ))
+        rules.append(
+            PolicyRule(
+                id=rule_id,
+                description=description,
+                severity=severity,
+                passed=passed,
+                details=details,
+            )
+        )
 
     # Tally results
     passed_count = sum(1 for r in rules if r.passed)

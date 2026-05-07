@@ -42,7 +42,9 @@ def generate_insights(project_path: str | Path) -> str:
             "last-updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "last-reviewed": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "commit-hash": _get_git_head(path),
-            "project-url": f"https://github.com/{info.repo_name}" if info.repo_name != path.name else "",
+            "project-url": f"https://github.com/{info.repo_name}"
+            if info.repo_name != path.name
+            else "",
             "changelog": _find_changelog_url(info, path),
         },
         "project-lifecycle": {
@@ -52,9 +54,9 @@ def generate_insights(project_path: str | Path) -> str:
         "contribution-policy": {
             "accepts-pull-requests": True,
             "accepts-automated-pull-requests": info.has_dependabot,
-            "contributing-policy": _find_file_url(path, info, [
-                "CONTRIBUTING.md", ".github/CONTRIBUTING.md"
-            ]),
+            "contributing-policy": _find_file_url(
+                path, info, ["CONTRIBUTING.md", ".github/CONTRIBUTING.md"]
+            ),
         },
         "documentation": {
             "README": _find_file_url(path, info, ["README.md"]),
@@ -66,9 +68,7 @@ def generate_insights(project_path: str | Path) -> str:
         "security-testing": [],
         "vulnerability-reporting": {
             "accepts-vulnerability-reports": info.has_security_md,
-            "security-policy": _find_file_url(path, info, [
-                "SECURITY.md", ".github/SECURITY.md"
-            ]),
+            "security-policy": _find_file_url(path, info, ["SECURITY.md", ".github/SECURITY.md"]),
         },
         "dependencies": {
             "third-party-packages": True,
@@ -83,27 +83,31 @@ def generate_insights(project_path: str | Path) -> str:
     # Security testing
     testing = []
     if info.has_codeql:
-        testing.append({
-            "tool-type": "sast",
-            "tool-name": "CodeQL",
-            "tool-url": "https://codeql.github.com/",
-            "integration": {"ci": True, "before-release": False},
-        })
+        testing.append(
+            {
+                "tool-type": "sast",
+                "tool-name": "CodeQL",
+                "tool-url": "https://codeql.github.com/",
+                "integration": {"ci": True, "before-release": False},
+            }
+        )
     if info.has_scorecard:
-        testing.append({
-            "tool-type": "scorecard",
-            "tool-name": "OpenSSF Scorecard",
-            "tool-url": "https://securityscorecards.dev/",
-            "integration": {"ci": True, "before-release": False},
-        })
+        testing.append(
+            {
+                "tool-type": "scorecard",
+                "tool-name": "OpenSSF Scorecard",
+                "tool-url": "https://securityscorecards.dev/",
+                "integration": {"ci": True, "before-release": False},
+            }
+        )
     insights["security-testing"] = testing
 
     # Security artifacts
     artifacts = {}
     if info.has_security_md:
-        artifacts["security-policy"] = _find_file_url(path, info, [
-            "SECURITY.md", ".github/SECURITY.md"
-        ])
+        artifacts["security-policy"] = _find_file_url(
+            path, info, ["SECURITY.md", ".github/SECURITY.md"]
+        )
     if info.has_sigstore:
         artifacts["signing"] = {"enabled": True, "tool": "Sigstore"}
     insights["security-artifacts"] = artifacts
@@ -132,8 +136,10 @@ def validate_insights(project_path: str | Path) -> InsightsReport:
 
     # Find the file
     candidates = [
-        "SECURITY-INSIGHTS.yml", "security-insights.yml",
-        ".github/SECURITY-INSIGHTS.yml", ".github/security-insights.yml",
+        "SECURITY-INSIGHTS.yml",
+        "security-insights.yml",
+        ".github/SECURITY-INSIGHTS.yml",
+        ".github/security-insights.yml",
     ]
     found = None
     for name in candidates:
@@ -226,8 +232,14 @@ def _find_file_url(path: Path, info: ProjectInfo, candidates: list[str]) -> str:
 def _find_dep_files(path: Path) -> list[str]:
     dep_files = []
     candidates = [
-        "package.json", "requirements.txt", "pyproject.toml", "go.mod",
-        "Cargo.toml", "pom.xml", "composer.json", "Gemfile",
+        "package.json",
+        "requirements.txt",
+        "pyproject.toml",
+        "go.mod",
+        "Cargo.toml",
+        "pom.xml",
+        "composer.json",
+        "Gemfile",
     ]
     for name in candidates:
         if (path / name).exists():

@@ -38,12 +38,12 @@ class PinReport:
 
 # Pattern to match GitHub Actions `uses:` references
 _USES_PATTERN = re.compile(
-    r'^(\s*-?\s*uses:\s*)([a-zA-Z0-9\-_.]+/[a-zA-Z0-9\-_.]+(?:/[a-zA-Z0-9\-_.]+)?)@(\S+)',
+    r"^(\s*-?\s*uses:\s*)([a-zA-Z0-9\-_.]+/[a-zA-Z0-9\-_.]+(?:/[a-zA-Z0-9\-_.]+)?)@(\S+)",
     re.MULTILINE,
 )
 
 # A SHA-like ref is 40 hex chars
-_SHA_PATTERN = re.compile(r'^[0-9a-f]{40}$')
+_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 
 
 def scan_actions(project_path: str | Path) -> PinReport:
@@ -84,17 +84,19 @@ def scan_actions(project_path: str | Path) -> PinReport:
                 already += 1
 
             # Calculate line number
-            line_num = content[:match.start()].count('\n') + 1
+            line_num = content[: match.start()].count("\n") + 1
 
-            actions.append(PinAction(
-                file=wf_file.name,
-                line_number=line_num,
-                original=f"{action_ref}@{ref}",
-                owner=owner,
-                repo=repo,
-                ref=ref,
-                already_pinned=is_pinned,
-            ))
+            actions.append(
+                PinAction(
+                    file=wf_file.name,
+                    line_number=line_num,
+                    original=f"{action_ref}@{ref}",
+                    owner=owner,
+                    repo=repo,
+                    ref=ref,
+                    already_pinned=is_pinned,
+                )
+            )
 
     return PinReport(
         actions=actions,
@@ -203,7 +205,9 @@ def _resolve_single(client: httpx.Client, owner: str, repo: str, ref: str) -> st
                 # If it's an annotated tag, we need to dereference it
                 if obj.get("type") == "tag" and sha:
                     tag_url = f"https://api.github.com/repos/{owner}/{repo}/git/tags/{sha}"
-                    tag_resp = client.get(tag_url, headers={"Accept": "application/vnd.github.v3+json"})
+                    tag_resp = client.get(
+                        tag_url, headers={"Accept": "application/vnd.github.v3+json"}
+                    )
                     if tag_resp.status_code == 200:
                         tag_data = tag_resp.json()
                         sha = tag_data.get("object", {}).get("sha", sha)

@@ -23,8 +23,12 @@ class TestDepHealth:
 
         # Mock deps.dev returns basic info
         mock_ddc = MagicMock()
-        mock_ddc.get_version.return_value = PackageInfo(name="requests", latest_version="2.31.0", license="Apache-2.0")
-        mock_ddc.get_package.return_value = PackageInfo(name="requests", latest_version="2.31.0", license="Apache-2.0")
+        mock_ddc.get_version.return_value = PackageInfo(
+            name="requests", latest_version="2.31.0", license="Apache-2.0"
+        )
+        mock_ddc.get_package.return_value = PackageInfo(
+            name="requests", latest_version="2.31.0", license="Apache-2.0"
+        )
         mock_ddc_cls.return_value.__enter__ = MagicMock(return_value=mock_ddc)
         mock_ddc_cls.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -109,8 +113,18 @@ class TestDrift:
             "specVersion": "1.5",
             "metadata": {"component": {"name": "app", "version": "1.0"}},
             "components": [
-                {"type": "library", "name": "lodash", "version": "4.17.20", "purl": "pkg:npm/lodash@4.17.20"},
-                {"type": "library", "name": "react", "version": "18.0.0", "purl": "pkg:npm/react@18.0.0"},
+                {
+                    "type": "library",
+                    "name": "lodash",
+                    "version": "4.17.20",
+                    "purl": "pkg:npm/lodash@4.17.20",
+                },
+                {
+                    "type": "library",
+                    "name": "react",
+                    "version": "18.0.0",
+                    "purl": "pkg:npm/react@18.0.0",
+                },
             ],
         }
         new_sbom = {
@@ -118,8 +132,18 @@ class TestDrift:
             "specVersion": "1.5",
             "metadata": {"component": {"name": "app", "version": "1.1"}},
             "components": [
-                {"type": "library", "name": "lodash", "version": "4.17.21", "purl": "pkg:npm/lodash@4.17.21"},
-                {"type": "library", "name": "express", "version": "4.18.0", "purl": "pkg:npm/express@4.18.0"},
+                {
+                    "type": "library",
+                    "name": "lodash",
+                    "version": "4.17.21",
+                    "purl": "pkg:npm/lodash@4.17.21",
+                },
+                {
+                    "type": "library",
+                    "name": "express",
+                    "version": "4.18.0",
+                    "purl": "pkg:npm/express@4.18.0",
+                },
             ],
         }
 
@@ -143,7 +167,12 @@ class TestDrift:
             "specVersion": "1.5",
             "metadata": {"component": {"name": "app", "version": "1.0"}},
             "components": [
-                {"type": "library", "name": "lodash", "version": "4.17.21", "purl": "pkg:npm/lodash@4.17.21"},
+                {
+                    "type": "library",
+                    "name": "lodash",
+                    "version": "4.17.21",
+                    "purl": "pkg:npm/lodash@4.17.21",
+                },
             ],
         }
 
@@ -172,7 +201,12 @@ class TestWatch:
             "specVersion": "1.5",
             "metadata": {"component": {"name": "app", "version": "1.0"}},
             "components": [
-                {"type": "library", "name": "lodash", "version": "4.17.21", "purl": "pkg:npm/lodash@4.17.21"},
+                {
+                    "type": "library",
+                    "name": "lodash",
+                    "version": "4.17.21",
+                    "purl": "pkg:npm/lodash@4.17.21",
+                },
             ],
         }
         sbom_path = tmp_path / "sbom.json"
@@ -199,7 +233,12 @@ class TestWatch:
             "specVersion": "1.5",
             "metadata": {"component": {"name": "app", "version": "1.0"}},
             "components": [
-                {"type": "library", "name": "lodash", "version": "4.17.20", "purl": "pkg:npm/lodash@4.17.20"},
+                {
+                    "type": "library",
+                    "name": "lodash",
+                    "version": "4.17.20",
+                    "purl": "pkg:npm/lodash@4.17.20",
+                },
             ],
         }
         sbom_path = tmp_path / "sbom.json"

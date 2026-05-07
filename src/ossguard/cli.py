@@ -48,7 +48,9 @@ def init(
     skip_sbom: bool = typer.Option(False, "--skip-sbom", help="Skip SBOM workflow setup"),
     skip_sigstore: bool = typer.Option(False, "--skip-sigstore", help="Skip Sigstore setup"),
     skip_security_md: bool = typer.Option(False, "--skip-security-md", help="Skip SECURITY.md"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be created without writing files"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show what would be created without writing files"
+    ),
     force: bool = typer.Option(False, "--force", "-f", help="Overwrite existing files"),
 ) -> None:
     """Initialize OpenSSF security best practices for a project."""
@@ -66,7 +68,16 @@ def init(
 
     # Phase 2: Determine what to generate
     console.print("\n[bold cyan]Phase 2: Planning security setup...[/]\n")
-    plan = _build_plan(info, skip_scorecard, skip_codeql, skip_dependabot, skip_sbom, skip_sigstore, skip_security_md, force)
+    plan = _build_plan(
+        info,
+        skip_scorecard,
+        skip_codeql,
+        skip_dependabot,
+        skip_sbom,
+        skip_sigstore,
+        skip_security_md,
+        force,
+    )
     _print_plan(plan, info)
 
     if not plan:
@@ -99,62 +110,76 @@ def _build_plan(
     plan = []
 
     if (force or not info.has_security_md) and not skip_security_md:
-        plan.append({
-            "id": "security_md",
-            "name": "SECURITY.md",
-            "description": "Vulnerability disclosure policy (OpenSSF CVD Guide)",
-            "path": "SECURITY.md",
-        })
+        plan.append(
+            {
+                "id": "security_md",
+                "name": "SECURITY.md",
+                "description": "Vulnerability disclosure policy (OpenSSF CVD Guide)",
+                "path": "SECURITY.md",
+            }
+        )
 
     if (force or not info.has_scorecard) and not skip_scorecard:
-        plan.append({
-            "id": "scorecard",
-            "name": "Scorecard Workflow",
-            "description": "OpenSSF Scorecard automated security assessment",
-            "path": ".github/workflows/scorecard.yml",
-        })
+        plan.append(
+            {
+                "id": "scorecard",
+                "name": "Scorecard Workflow",
+                "description": "OpenSSF Scorecard automated security assessment",
+                "path": ".github/workflows/scorecard.yml",
+            }
+        )
 
     if (force or not info.has_dependabot) and not skip_dependabot:
-        plan.append({
-            "id": "dependabot",
-            "name": "Dependabot Config",
-            "description": "Automated dependency updates and security patches",
-            "path": ".github/dependabot.yml",
-        })
+        plan.append(
+            {
+                "id": "dependabot",
+                "name": "Dependabot Config",
+                "description": "Automated dependency updates and security patches",
+                "path": ".github/dependabot.yml",
+            }
+        )
 
     if (force or not info.has_codeql) and not skip_codeql:
         codeql_content = generate_codeql_workflow(info.languages)
         if codeql_content is not None:
-            plan.append({
-                "id": "codeql",
-                "name": "CodeQL Workflow",
-                "description": "Automated code scanning for security vulnerabilities",
-                "path": ".github/workflows/codeql.yml",
-            })
+            plan.append(
+                {
+                    "id": "codeql",
+                    "name": "CodeQL Workflow",
+                    "description": "Automated code scanning for security vulnerabilities",
+                    "path": ".github/workflows/codeql.yml",
+                }
+            )
 
     if (force or not info.has_sbom_workflow) and not skip_sbom:
-        plan.append({
-            "id": "sbom",
-            "name": "SBOM Workflow",
-            "description": "Software Bill of Materials generation for releases",
-            "path": ".github/workflows/sbom.yml",
-        })
+        plan.append(
+            {
+                "id": "sbom",
+                "name": "SBOM Workflow",
+                "description": "Software Bill of Materials generation for releases",
+                "path": ".github/workflows/sbom.yml",
+            }
+        )
 
     if (force or not info.has_sigstore) and not skip_sigstore:
-        plan.append({
-            "id": "sigstore",
-            "name": "Sigstore Signing",
-            "description": "Cryptographic signing of release artifacts",
-            "path": ".github/workflows/sigstore.yml",
-        })
+        plan.append(
+            {
+                "id": "sigstore",
+                "name": "Sigstore Signing",
+                "description": "Cryptographic signing of release artifacts",
+                "path": ".github/workflows/sigstore.yml",
+            }
+        )
 
     # Always offer branch protection guide
-    plan.append({
-        "id": "branch_protection",
-        "name": "Branch Protection Guide",
-        "description": "Guide for setting up branch protection (OpenSSF SCM Best Practices)",
-        "path": ".github/BRANCH_PROTECTION.md",
-    })
+    plan.append(
+        {
+            "id": "branch_protection",
+            "name": "Branch Protection Guide",
+            "description": "Guide for setting up branch protection (OpenSSF SCM Best Practices)",
+            "path": ".github/BRANCH_PROTECTION.md",
+        }
+    )
 
     return plan
 
@@ -173,7 +198,9 @@ def _execute_plan(
         file_path = project_path / item["path"]
 
         if file_path.exists() and not force:
-            console.print(f"  [yellow]SKIP[/] {item['path']} (already exists, use --force to overwrite)")
+            console.print(
+                f"  [yellow]SKIP[/] {item['path']} (already exists, use --force to overwrite)"
+            )
             continue
 
         # Generate content
@@ -223,8 +250,13 @@ def _print_detection_results(info: ProjectInfo) -> None:
     table.add_row("Git Initialized", _bool_icon(info.has_git))
     table.add_row("Languages", ", ".join(info.languages) if info.languages else "(none detected)")
     table.add_row("Primary Language", info.primary_language or "(none)")
-    table.add_row("Package Managers", ", ".join(info.package_managers) if info.package_managers else "(none detected)")
-    table.add_row("Frameworks", ", ".join(info.frameworks) if info.frameworks else "(none detected)")
+    table.add_row(
+        "Package Managers",
+        ", ".join(info.package_managers) if info.package_managers else "(none detected)",
+    )
+    table.add_row(
+        "Frameworks", ", ".join(info.frameworks) if info.frameworks else "(none detected)"
+    )
 
     console.print(table)
 
@@ -263,21 +295,23 @@ def _print_summary(created_files: list[str], info: ProjectInfo) -> None:
 
     # Next steps
     next_steps = Panel(
-        "\n".join([
-            "[bold]Next steps to complete your OpenSSF security setup:[/]\n",
-            "1. [cyan]Review generated files[/] and customize for your project",
-            "   - Update SECURITY.md with your actual security contact email",
-            "   - Adjust workflow triggers if needed\n",
-            "2. [cyan]Commit and push[/] the new files to your repository",
-            "   git add . && git commit -m 'chore: add OpenSSF security configurations'\n",
-            "3. [cyan]Set up branch protection[/] — see .github/BRANCH_PROTECTION.md\n",
-            "4. [cyan]Get your OpenSSF Best Practices Badge[/]",
-            "   https://www.bestpractices.dev/\n",
-            "5. [cyan]Check your Scorecard[/] after the first workflow run",
-            "   https://scorecard.dev/viewer/\n",
-            "6. [cyan]Join the OpenSSF community[/]",
-            "   https://slack.openssf.org/\n",
-        ]),
+        "\n".join(
+            [
+                "[bold]Next steps to complete your OpenSSF security setup:[/]\n",
+                "1. [cyan]Review generated files[/] and customize for your project",
+                "   - Update SECURITY.md with your actual security contact email",
+                "   - Adjust workflow triggers if needed\n",
+                "2. [cyan]Commit and push[/] the new files to your repository",
+                "   git add . && git commit -m 'chore: add OpenSSF security configurations'\n",
+                "3. [cyan]Set up branch protection[/] — see .github/BRANCH_PROTECTION.md\n",
+                "4. [cyan]Get your OpenSSF Best Practices Badge[/]",
+                "   https://www.bestpractices.dev/\n",
+                "5. [cyan]Check your Scorecard[/] after the first workflow run",
+                "   https://scorecard.dev/viewer/\n",
+                "6. [cyan]Join the OpenSSF community[/]",
+                "   https://slack.openssf.org/\n",
+            ]
+        ),
         title="[bold blue]Next Steps[/]",
         border_style="blue",
     )
@@ -359,7 +393,9 @@ def deps(
     dep_list = parse_dependencies(project_path)
 
     if not dep_list:
-        console.print("[yellow]No dependencies found.[/] Supported: package.json, requirements.txt, pyproject.toml, go.mod, Cargo.toml, and more.")
+        console.print(
+            "[yellow]No dependencies found.[/] Supported: package.json, requirements.txt, pyproject.toml, go.mod, Cargo.toml, and more."
+        )
         raise typer.Exit(0)
 
     console.print(f"Found [bold]{len(dep_list)}[/] dependencies. Querying OSV & deps.dev APIs...\n")
@@ -369,6 +405,7 @@ def deps(
 
     if json_output:
         import json as json_mod
+
         data = {
             "total_deps": report.total_deps,
             "total_vulns": report.total_vulns,
@@ -403,7 +440,13 @@ def deps(
     table.add_column("Score", justify="center", max_width=6)
     table.add_column("License", max_width=15)
 
-    risk_colors = {"CRITICAL": "bold red", "HIGH": "red", "MEDIUM": "yellow", "LOW": "cyan", "OK": "green"}
+    risk_colors = {
+        "CRITICAL": "bold red",
+        "HIGH": "red",
+        "MEDIUM": "yellow",
+        "LOW": "cyan",
+        "OK": "green",
+    }
 
     for r in report.results:
         risk_style = risk_colors.get(r.risk_level, "white")
@@ -425,7 +468,13 @@ def deps(
     console.print(table)
 
     # Summary panel
-    agg_color = "green" if report.aggregate_score >= 8 else "yellow" if report.aggregate_score >= 5 else "red"
+    agg_color = (
+        "green"
+        if report.aggregate_score >= 8
+        else "yellow"
+        if report.aggregate_score >= 5
+        else "red"
+    )
     summary = (
         f"[{agg_color} bold]Aggregate Score: {report.aggregate_score}/10[/]  •  "
         f"Risk: {report.risk_summary}  •  "
@@ -440,7 +489,9 @@ def deps(
 def drift(
     old: str = typer.Argument(..., help="Path to the older SBOM file (JSON)"),
     new: str = typer.Argument(..., help="Path to the newer SBOM file (JSON)"),
-    no_vulns: bool = typer.Option(False, "--no-vulns", help="Skip vulnerability check on changed deps"),
+    no_vulns: bool = typer.Option(
+        False, "--no-vulns", help="Skip vulnerability check on changed deps"
+    ),
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Diff two SBOMs and show dependency drift with risk assessment."""
@@ -458,6 +509,7 @@ def drift(
 
     if json_output:
         import json as json_mod
+
         data = {
             "old": report.old_name,
             "new": report.new_name,
@@ -495,7 +547,14 @@ def drift(
     table.add_column("Risk", justify="center", max_width=10)
 
     change_colors = {"added": "green", "removed": "red", "upgraded": "cyan", "downgraded": "yellow"}
-    risk_colors = {"CRITICAL": "bold red", "HIGH": "red", "MEDIUM": "yellow", "WARN": "yellow", "NEW": "cyan", "OK": "green"}
+    risk_colors = {
+        "CRITICAL": "bold red",
+        "HIGH": "red",
+        "MEDIUM": "yellow",
+        "WARN": "yellow",
+        "NEW": "cyan",
+        "OK": "green",
+    }
 
     for e in report.entries:
         c_style = change_colors.get(e.change_type, "white")
@@ -512,7 +571,13 @@ def drift(
     console.print(table)
 
     # Summary
-    delta_color = "red" if "INCREASE" in report.risk_delta else "green" if "DECREASED" in report.risk_delta else "yellow"
+    delta_color = (
+        "red"
+        if "INCREASE" in report.risk_delta
+        else "green"
+        if "DECREASED" in report.risk_delta
+        else "yellow"
+    )
     summary = (
         f"[{delta_color} bold]Risk Delta: {report.risk_delta}[/]  •  "
         f"+{report.added} added, -{report.removed} removed, "
@@ -558,11 +623,13 @@ def watch(
         console.print(f"Webhook: {'[green]sent[/]' if ok else '[red]failed[/]'}")
 
     if report.is_clean:
-        console.print(Panel(
-            f"[bold green]No vulnerabilities found![/]\n"
-            f"Scanned {report.total_components} components in {report.sbom_name or sbom}",
-            title="[bold]Watch Report[/]",
-        ))
+        console.print(
+            Panel(
+                f"[bold green]No vulnerabilities found![/]\n"
+                f"Scanned {report.total_components} components in {report.sbom_name or sbom}",
+                title="[bold]Watch Report[/]",
+            )
+        )
         raise typer.Exit(0)
 
     table = Table(title=f"Vulnerability Alerts — {report.sbom_name or sbom}")
@@ -573,7 +640,13 @@ def watch(
     table.add_column("Fix Version", max_width=12)
     table.add_column("Summary", max_width=40)
 
-    severity_colors = {"CRITICAL": "bold red", "HIGH": "red", "MEDIUM": "yellow", "LOW": "green", "UNKNOWN": "dim"}
+    severity_colors = {
+        "CRITICAL": "bold red",
+        "HIGH": "red",
+        "MEDIUM": "yellow",
+        "LOW": "green",
+        "UNKNOWN": "dim",
+    }
 
     for alert in report.alerts:
         for vuln in alert.vulns:
@@ -600,7 +673,9 @@ def watch(
 @app.command()
 def tpn(
     path: str = typer.Argument(".", help="Path to the project directory"),
-    output_format: str = typer.Option("text", "--format", "-f", help="Output format: text, html, json"),
+    output_format: str = typer.Option(
+        "text", "--format", "-f", help="Output format: text, html, json"
+    ),
     output_file: str = typer.Option("", "--output", "-o", help="Save to file (default: stdout)"),
 ) -> None:
     """Generate third-party notices from project dependencies."""
@@ -622,7 +697,9 @@ def tpn(
         raise typer.Exit(0)
 
     project_name = project_path.name
-    console.print(f"Found [bold]{len(dep_list)}[/] dependencies. Fetching license info from deps.dev...\n")
+    console.print(
+        f"Found [bold]{len(dep_list)}[/] dependencies. Fetching license info from deps.dev...\n"
+    )
 
     with console.status("[bold green]Generating third-party notices..."):
         report = generate_tpn(dep_list, project_name=project_name)
@@ -651,10 +728,12 @@ def tpn(
     if report.conflicts:
         warnings += f"  •  [red]{len(report.conflicts)} potential conflicts[/]"
 
-    console.print(Panel(
-        f"[bold]{len(report.entries)}[/] components documented{warnings}",
-        title="[bold]TPN Summary[/]",
-    ))
+    console.print(
+        Panel(
+            f"[bold]{len(report.entries)}[/] components documented{warnings}",
+            title="[bold]TPN Summary[/]",
+        )
+    )
 
     if not output_file:
         console.print(f"\n[dim]Tip: Save with[/] [cyan]ossguard tpn --output {default_file}[/]")
@@ -688,6 +767,7 @@ def reach(
 
     if json_output:
         import json as json_mod
+
         data = {
             "total_deps": report.total_deps,
             "reachable_deps": report.reachable_deps,
@@ -777,26 +857,38 @@ def audit(
     # Grade display
     grade_colors = {"A": "green", "B": "green", "C": "yellow", "D": "red", "F": "bold red"}
     g_color = grade_colors.get(report.overall_grade, "white")
-    console.print(Panel(
-        f"[{g_color}]  {report.overall_grade}  [/]",
-        title="[bold]Overall Security Grade[/]",
-        width=30,
-    ))
+    console.print(
+        Panel(
+            f"[{g_color}]  {report.overall_grade}  [/]",
+            title="[bold]Overall Security Grade[/]",
+            width=30,
+        )
+    )
 
     # Config score
-    cfg_color = "green" if report.config_pct == 100 else "yellow" if report.config_pct >= 50 else "red"
-    console.print(f"\n[bold]Configuration:[/] [{cfg_color}]{report.config_score}/{report.config_total} ({report.config_pct}%)[/]")
+    cfg_color = (
+        "green" if report.config_pct == 100 else "yellow" if report.config_pct >= 50 else "red"
+    )
+    console.print(
+        f"\n[bold]Configuration:[/] [{cfg_color}]{report.config_score}/{report.config_total} ({report.config_pct}%)[/]"
+    )
 
     # Dep health
     if report.dep_health:
         dh = report.dep_health
-        dh_color = "green" if dh.aggregate_score >= 8 else "yellow" if dh.aggregate_score >= 5 else "red"
-        console.print(f"[bold]Dependency Health:[/] [{dh_color}]{dh.aggregate_score}/10[/] ({dh.total_deps} deps, {dh.total_vulns} vulns)")
+        dh_color = (
+            "green" if dh.aggregate_score >= 8 else "yellow" if dh.aggregate_score >= 5 else "red"
+        )
+        console.print(
+            f"[bold]Dependency Health:[/] [{dh_color}]{dh.aggregate_score}/10[/] ({dh.total_deps} deps, {dh.total_vulns} vulns)"
+        )
 
     # Reachability
     if report.reachability and report.reachability.total_vulns > 0:
         r = report.reachability
-        console.print(f"[bold]Reachability:[/] {r.reachable_vulns} reachable vulns, {r.filtered_vulns} filtered ({r.noise_reduction_pct}% noise reduction)")
+        console.print(
+            f"[bold]Reachability:[/] {r.reachable_vulns} reachable vulns, {r.filtered_vulns} filtered ({r.noise_reduction_pct}% noise reduction)"
+        )
 
     # Findings
     if report.findings:
@@ -814,7 +906,9 @@ def audit(
 @app.command()
 def fix(
     path: str = typer.Argument(".", help="Path to the project directory"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be fixed without applying"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show what would be fixed without applying"
+    ),
     no_deps: bool = typer.Option(False, "--no-deps", help="Skip dependency version bumps"),
     no_configs: bool = typer.Option(False, "--no-configs", help="Skip adding missing config files"),
 ) -> None:
@@ -890,6 +984,7 @@ def badge(
 
     if json_output:
         import json as json_mod
+
         data = {
             "readiness_pct": report.readiness_pct,
             "met": report.met_count,
@@ -911,11 +1006,15 @@ def badge(
         raise typer.Exit(0)
 
     # Readiness gauge
-    r_color = "green" if report.readiness_pct >= 80 else "yellow" if report.readiness_pct >= 50 else "red"
-    console.print(Panel(
-        f"[{r_color} bold]{report.readiness_pct}%[/] ready for OpenSSF Best Practices Badge",
-        title="[bold]Badge Readiness[/]",
-    ))
+    r_color = (
+        "green" if report.readiness_pct >= 80 else "yellow" if report.readiness_pct >= 50 else "red"
+    )
+    console.print(
+        Panel(
+            f"[{r_color} bold]{report.readiness_pct}%[/] ready for OpenSSF Best Practices Badge",
+            title="[bold]Badge Readiness[/]",
+        )
+    )
 
     # Criteria table grouped by category
     current_category = ""
@@ -944,7 +1043,9 @@ def badge(
 @app.command()
 def ci(
     path: str = typer.Argument(".", help="Path to the project directory"),
-    output_file: str = typer.Option("", "--output", "-o", help="Save to file (default: .github/workflows/ossguard-ci.yml)"),
+    output_file: str = typer.Option(
+        "", "--output", "-o", help="Save to file (default: .github/workflows/ossguard-ci.yml)"
+    ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Preview without writing"),
 ) -> None:
     """Generate a unified CI security pipeline (single workflow with all checks)."""
@@ -971,7 +1072,15 @@ def ci(
 
     console.print(f"[green]Created[/] {target}")
     console.print("\n[bold]Jobs included:[/]")
-    for job in ["Build & Test", "Lint & Format", "CodeQL Analysis", "Dependency Audit", "Scorecard", "SBOM Generation", "Security Gate"]:
+    for job in [
+        "Build & Test",
+        "Lint & Format",
+        "CodeQL Analysis",
+        "Dependency Audit",
+        "Scorecard",
+        "SBOM Generation",
+        "Security Gate",
+    ]:
         console.print(f"  [green]+[/] {job}")
 
 
@@ -982,7 +1091,9 @@ def report(
     output_file: str = typer.Option("", "--output", "-o", help="Save to file"),
 ) -> None:
     """Export a comprehensive security compliance report (HTML or JSON)."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Report[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Report[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1013,7 +1124,9 @@ def policy(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Check project against org-wide security policies."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Policy[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Policy[/]", subtitle=f"v{__version__}")
+    )
 
     from ossguard.analyzers.policy import check_policy, generate_policy_template
 
@@ -1041,9 +1154,18 @@ def policy(
 
     # Compliance status
     if report_data.compliant:
-        console.print(Panel("[bold green]COMPLIANT[/] — all required rules pass", title="[bold]Policy Status[/]"))
+        console.print(
+            Panel(
+                "[bold green]COMPLIANT[/] — all required rules pass", title="[bold]Policy Status[/]"
+            )
+        )
     else:
-        console.print(Panel("[bold red]NON-COMPLIANT[/] — some required rules failed", title="[bold]Policy Status[/]"))
+        console.print(
+            Panel(
+                "[bold red]NON-COMPLIANT[/] — some required rules failed",
+                title="[bold]Policy Status[/]",
+            )
+        )
 
     table = Table(title=f"Policy Rules — {report_data.policy_file}")
     table.add_column("Rule", style="bold", max_width=40)
@@ -1077,11 +1199,15 @@ def policy(
 @app.command(name="license")
 def license_check(
     path: str = typer.Argument(".", help="Path to the project directory"),
-    project_license: str = typer.Option("", "--project-license", help="Your project's SPDX license ID (e.g. Apache-2.0)"),
+    project_license: str = typer.Option(
+        "", "--project-license", help="Your project's SPDX license ID (e.g. Apache-2.0)"
+    ),
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Check dependency license compliance and detect conflicts."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — License[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — License[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1118,6 +1244,7 @@ def license_check(
 
     if json_output:
         import json as json_mod
+
         data = {
             "project_license": report_data.project_license,
             "compliant": report_data.compliant,
@@ -1125,7 +1252,12 @@ def license_check(
             "unknown_count": len(report_data.unknown_licenses),
             "conflict_count": len(report_data.conflicts),
             "licenses": [
-                {"name": lic.name, "version": lic.version, "license": lic.license, "category": lic.category}
+                {
+                    "name": lic.name,
+                    "version": lic.version,
+                    "license": lic.license,
+                    "category": lic.category,
+                }
                 for lic in report_data.licenses
             ],
         }
@@ -1139,7 +1271,12 @@ def license_check(
     table.add_column("License", max_width=20)
     table.add_column("Category", max_width=15)
 
-    cat_colors = {"permissive": "green", "weak_copyleft": "yellow", "copyleft": "red", "unknown": "dim"}
+    cat_colors = {
+        "permissive": "green",
+        "weak_copyleft": "yellow",
+        "copyleft": "red",
+        "unknown": "dim",
+    }
 
     for lic in report_data.licenses:
         c_color = cat_colors.get(lic.category, "white")
@@ -1172,9 +1309,18 @@ def license_check(
 
     # Compliance status
     if report_data.compliant:
-        console.print(Panel("[bold green]COMPLIANT[/] — no license conflicts detected", title="[bold]License Status[/]"))
+        console.print(
+            Panel(
+                "[bold green]COMPLIANT[/] — no license conflicts detected",
+                title="[bold]License Status[/]",
+            )
+        )
     else:
-        console.print(Panel("[bold red]NON-COMPLIANT[/] — license issues found", title="[bold]License Status[/]"))
+        console.print(
+            Panel(
+                "[bold red]NON-COMPLIANT[/] — license issues found", title="[bold]License Status[/]"
+            )
+        )
 
 
 @app.command()
@@ -1184,7 +1330,9 @@ def baseline(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Check project against the OSPS Security Baseline (Levels 1-3)."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Baseline[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Baseline[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1198,14 +1346,34 @@ def baseline(
 
     if json_output:
         import json as json_mod
+
         data = {
             "achieved_level": report.achieved_level,
-            "level1": {"pass": report.level1_pass, "total": report.level1_total, "pct": report.level1_pct},
-            "level2": {"pass": report.level2_pass, "total": report.level2_total, "pct": report.level2_pct},
-            "level3": {"pass": report.level3_pass, "total": report.level3_total, "pct": report.level3_pct},
+            "level1": {
+                "pass": report.level1_pass,
+                "total": report.level1_total,
+                "pct": report.level1_pct,
+            },
+            "level2": {
+                "pass": report.level2_pass,
+                "total": report.level2_total,
+                "pct": report.level2_pct,
+            },
+            "level3": {
+                "pass": report.level3_pass,
+                "total": report.level3_total,
+                "pct": report.level3_pct,
+            },
             "controls": [
-                {"id": c.id, "family": c.family, "title": c.title, "level": c.level,
-                 "status": c.status, "evidence": c.evidence, "recommendation": c.recommendation}
+                {
+                    "id": c.id,
+                    "family": c.family,
+                    "title": c.title,
+                    "level": c.level,
+                    "status": c.status,
+                    "evidence": c.evidence,
+                    "recommendation": c.recommendation,
+                }
                 for c in report.controls
             ],
         }
@@ -1215,10 +1383,13 @@ def baseline(
     # Achieved level badge
     lvl_colors = {0: "red", 1: "yellow", 2: "green", 3: "bold green"}
     lvl_color = lvl_colors.get(report.achieved_level, "white")
-    console.print(Panel(
-        f"[{lvl_color}]Level {report.achieved_level}[/]",
-        title="[bold]OSPS Baseline — Achieved Level[/]", width=35,
-    ))
+    console.print(
+        Panel(
+            f"[{lvl_color}]Level {report.achieved_level}[/]",
+            title="[bold]OSPS Baseline — Achieved Level[/]",
+            width=35,
+        )
+    )
 
     # Level progress bars
     for lvl, lbl, passed, total, pct in [
@@ -1255,7 +1426,9 @@ def insights(
     output_file: str = typer.Option("", "--output", "-o", help="Output file path"),
 ) -> None:
     """Generate or validate a SECURITY-INSIGHTS.yml file."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Insights[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Insights[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1348,7 +1521,9 @@ def secrets(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Scan project for leaked secrets and credentials."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Secrets[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Secrets[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1362,6 +1537,7 @@ def secrets(
 
     if json_output:
         import json as json_mod
+
         data = {
             "clean": report.clean,
             "files_scanned": report.files_scanned,
@@ -1370,8 +1546,13 @@ def secrets(
             "high": report.high_count,
             "medium": report.medium_count,
             "findings": [
-                {"file": f.file, "line": f.line_number, "rule": f.rule_id,
-                 "severity": f.severity, "description": f.description}
+                {
+                    "file": f.file,
+                    "line": f.line_number,
+                    "rule": f.rule_id,
+                    "severity": f.severity,
+                    "description": f.description,
+                }
                 for f in report.findings
             ],
         }
@@ -1381,7 +1562,9 @@ def secrets(
     console.print(f"Scanned [bold]{report.files_scanned}[/] files\n")
 
     if report.clean:
-        console.print(Panel("[bold green]CLEAN[/] — no secrets detected", title="[bold]Secrets Scan[/]"))
+        console.print(
+            Panel("[bold green]CLEAN[/] — no secrets detected", title="[bold]Secrets Scan[/]")
+        )
         raise typer.Exit(0)
 
     table = Table(title=f"Secret Findings ({report.total})")
@@ -1394,7 +1577,9 @@ def secrets(
 
     for f in report.findings:
         s_color = sev_colors.get(f.severity, "white")
-        table.add_row(f.file, str(f.line_number), f"[{s_color}]{f.severity.upper()}[/]", f.description)
+        table.add_row(
+            f.file, str(f.line_number), f"[{s_color}]{f.severity.upper()}[/]", f.description
+        )
 
     console.print(table)
 
@@ -1433,25 +1618,35 @@ def slsa(
 
     if json_output:
         import json as json_mod
+
         data = {
             "achieved_level": report.achieved_level,
             "level_label": report.level_label,
             "met": report.met_count,
             "total": report.total_count,
             "requirements": [
-                {"id": r.id, "level": r.level, "description": r.description,
-                 "status": r.status, "evidence": r.evidence}
+                {
+                    "id": r.id,
+                    "level": r.level,
+                    "description": r.description,
+                    "status": r.status,
+                    "evidence": r.evidence,
+                }
                 for r in report.requirements
             ],
         }
         console.print_json(json_mod.dumps(data))
         raise typer.Exit(0)
 
-    lvl_color = "green" if report.achieved_level >= 2 else "yellow" if report.achieved_level >= 1 else "red"
-    console.print(Panel(
-        f"[{lvl_color} bold]{report.level_label}[/]",
-        title="[bold]SLSA Assessment[/]",
-    ))
+    lvl_color = (
+        "green" if report.achieved_level >= 2 else "yellow" if report.achieved_level >= 1 else "red"
+    )
+    console.print(
+        Panel(
+            f"[{lvl_color} bold]{report.level_label}[/]",
+            title="[bold]SLSA Assessment[/]",
+        )
+    )
 
     table = Table(title="SLSA Requirements")
     table.add_column("Level", justify="center", max_width=6)
@@ -1473,7 +1668,9 @@ def sbom_gen(
     output_file: str = typer.Option("", "--output", "-o", help="Output file path"),
 ) -> None:
     """Generate a local SBOM (SPDX or CycloneDX) from dependency manifests."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — SBOM Gen[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — SBOM Gen[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1493,6 +1690,7 @@ def sbom_gen(
     console.print(f"Format: [bold]{sbom_format.upper()}[/]")
 
     import json as json_mod
+
     data = json_mod.loads(content)
     if sbom_format == "spdx":
         pkg_count = len(data.get("packages", [])) - 1  # Minus root
@@ -1507,7 +1705,9 @@ def supply_chain(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Check dependencies for supply-chain risks (malicious packages, typosquatting)."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Supply Chain[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Supply Chain[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1521,6 +1721,7 @@ def supply_chain(
 
     if json_output:
         import json as json_mod
+
         data = {
             "clean": report.clean,
             "total_deps": report.total_deps,
@@ -1528,8 +1729,13 @@ def supply_chain(
             "typosquat": report.typosquat_count,
             "risk": report.risk_count,
             "findings": [
-                {"package": f.package, "version": f.version, "type": f.finding_type,
-                 "severity": f.severity, "description": f.description}
+                {
+                    "package": f.package,
+                    "version": f.version,
+                    "type": f.finding_type,
+                    "severity": f.severity,
+                    "description": f.description,
+                }
                 for f in report.findings
             ],
         }
@@ -1537,10 +1743,12 @@ def supply_chain(
         raise typer.Exit(0)
 
     if report.clean:
-        console.print(Panel(
-            f"[bold green]CLEAN[/] — no supply chain risks detected across {report.total_deps} dependencies",
-            title="[bold]Supply Chain[/]",
-        ))
+        console.print(
+            Panel(
+                f"[bold green]CLEAN[/] — no supply chain risks detected across {report.total_deps} dependencies",
+                title="[bold]Supply Chain[/]",
+            )
+        )
         raise typer.Exit(0)
 
     table = Table(title="Supply Chain Findings")
@@ -1552,7 +1760,9 @@ def supply_chain(
     sev_colors = {"critical": "bold red", "high": "red", "medium": "yellow", "low": "dim"}
     for f in report.findings:
         s_color = sev_colors.get(f.severity, "white")
-        table.add_row(f.package, f.finding_type, f"[{s_color}]{f.severity.upper()}[/]", f.description)
+        table.add_row(
+            f.package, f.finding_type, f"[{s_color}]{f.severity.upper()}[/]", f.description
+        )
 
     console.print(table)
 
@@ -1572,7 +1782,9 @@ def container(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Lint Dockerfiles for security issues."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Container[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Container[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1589,6 +1801,7 @@ def container(
 
     if json_output:
         import json as json_mod
+
         data = {
             "clean": report.clean,
             "files_scanned": report.files_scanned,
@@ -1597,9 +1810,14 @@ def container(
             "medium": report.medium_count,
             "low": report.low_count,
             "findings": [
-                {"file": f.file, "line": f.line_number, "rule": f.rule_id,
-                 "severity": f.severity, "description": f.description,
-                 "recommendation": f.recommendation}
+                {
+                    "file": f.file,
+                    "line": f.line_number,
+                    "rule": f.rule_id,
+                    "severity": f.severity,
+                    "description": f.description,
+                    "recommendation": f.recommendation,
+                }
                 for f in report.findings
             ],
         }
@@ -1609,7 +1827,11 @@ def container(
     console.print(f"Scanned [bold]{report.files_scanned}[/] Dockerfile(s)\n")
 
     if report.clean:
-        console.print(Panel("[bold green]CLEAN[/] — no security issues found", title="[bold]Container Scan[/]"))
+        console.print(
+            Panel(
+                "[bold green]CLEAN[/] — no security issues found", title="[bold]Container Scan[/]"
+            )
+        )
         raise typer.Exit(0)
 
     table = Table(title="Dockerfile Findings")
@@ -1634,7 +1856,9 @@ def compare(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Compare security posture of two projects side by side."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Compare[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Compare[/]", subtitle=f"v{__version__}")
+    )
 
     a = Path(path_a).resolve()
     b = Path(path_b).resolve()
@@ -1650,6 +1874,7 @@ def compare(
 
     if json_output:
         import json as json_mod
+
         data = {
             "project_a": report.project_a_name,
             "project_b": report.project_b_name,
@@ -1680,19 +1905,31 @@ def compare(
 
     console.print(table)
 
-    winner_name = report.project_a_name if report.winner == "a" else report.project_b_name if report.winner == "b" else "Tie"
+    winner_name = (
+        report.project_a_name
+        if report.winner == "a"
+        else report.project_b_name
+        if report.winner == "b"
+        else "Tie"
+    )
     w_color = "green" if report.winner != "tie" else "yellow"
-    console.print(Panel(f"[{w_color} bold]{winner_name}[/]", title="[bold]Better Security Posture[/]"))
+    console.print(
+        Panel(f"[{w_color} bold]{winner_name}[/]", title="[bold]Better Security Posture[/]")
+    )
 
 
 @app.command()
 def update(
     path: str = typer.Argument(".", help="Path to the project directory"),
-    security_only: bool = typer.Option(False, "--security-only", help="Only show security-relevant updates"),
+    security_only: bool = typer.Option(
+        False, "--security-only", help="Only show security-relevant updates"
+    ),
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Show available dependency updates prioritized by security impact."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Update[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Update[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1706,13 +1943,20 @@ def update(
 
     if json_output:
         import json as json_mod
+
         data = {
             "total_updates": report.total_updates,
             "security_updates": report.security_updates,
             "up_to_date": report.up_to_date,
             "candidates": [
-                {"name": c.name, "current": c.current_version, "latest": c.latest_version,
-                 "priority": c.priority, "vulns": c.vuln_count, "reason": c.reason}
+                {
+                    "name": c.name,
+                    "current": c.current_version,
+                    "latest": c.latest_version,
+                    "priority": c.priority,
+                    "vulns": c.vuln_count,
+                    "reason": c.reason,
+                }
                 for c in report.candidates
             ],
         }
@@ -1720,7 +1964,9 @@ def update(
         raise typer.Exit(0)
 
     if not report.candidates:
-        console.print(Panel("[bold green]All dependencies are up to date![/]", title="[bold]Updates[/]"))
+        console.print(
+            Panel("[bold green]All dependencies are up to date![/]", title="[bold]Updates[/]")
+        )
         raise typer.Exit(0)
 
     table = Table(title="Available Updates")
@@ -1733,8 +1979,13 @@ def update(
     pri_colors = {"critical": "bold red", "high": "red", "medium": "yellow", "low": "dim"}
     for c in report.candidates:
         p_color = pri_colors.get(c.priority, "white")
-        table.add_row(c.name, c.current_version, c.latest_version,
-                       f"[{p_color}]{c.priority.upper()}[/]", c.reason)
+        table.add_row(
+            c.name,
+            c.current_version,
+            c.latest_version,
+            f"[{p_color}]{c.priority.upper()}[/]",
+            c.reason,
+        )
 
     console.print(table)
 
@@ -1753,7 +2004,9 @@ def maturity(
     json_output: bool = typer.Option(False, "--json", help="Output results as JSON"),
 ) -> None:
     """Assess S2C2F (Secure Supply Chain Consumption Framework) maturity level."""
-    console.print(Panel(BANNER, title="[bold blue]OSSGuard — Maturity[/]", subtitle=f"v{__version__}"))
+    console.print(
+        Panel(BANNER, title="[bold blue]OSSGuard — Maturity[/]", subtitle=f"v{__version__}")
+    )
 
     project_path = Path(path).resolve()
     if not project_path.is_dir():
@@ -1767,6 +2020,7 @@ def maturity(
 
     if json_output:
         import json as json_mod
+
         data = {
             "achieved_level": report.achieved_level,
             "level1_pct": report.level1_pct,
@@ -1774,22 +2028,35 @@ def maturity(
             "level3_pct": report.level3_pct,
             "level4_pct": report.level4_pct,
             "practices": [
-                {"id": p.id, "level": p.level, "category": p.category,
-                 "description": p.description, "status": p.status}
+                {
+                    "id": p.id,
+                    "level": p.level,
+                    "category": p.category,
+                    "description": p.description,
+                    "status": p.status,
+                }
                 for p in report.practices
             ],
         }
         console.print_json(json_mod.dumps(data))
         raise typer.Exit(0)
 
-    lvl_color = "green" if report.achieved_level >= 2 else "yellow" if report.achieved_level >= 1 else "red"
-    console.print(Panel(
-        f"[{lvl_color} bold]S2C2F Level {report.achieved_level}[/]",
-        title="[bold]Supply Chain Maturity[/]",
-    ))
+    lvl_color = (
+        "green" if report.achieved_level >= 2 else "yellow" if report.achieved_level >= 1 else "red"
+    )
+    console.print(
+        Panel(
+            f"[{lvl_color} bold]S2C2F Level {report.achieved_level}[/]",
+            title="[bold]Supply Chain Maturity[/]",
+        )
+    )
 
-    for lvl, pct in [(1, report.level1_pct), (2, report.level2_pct),
-                      (3, report.level3_pct), (4, report.level4_pct)]:
+    for lvl, pct in [
+        (1, report.level1_pct),
+        (2, report.level2_pct),
+        (3, report.level3_pct),
+        (4, report.level4_pct),
+    ]:
         bar_color = "green" if pct == 100 else "yellow" if pct >= 50 else "red"
         console.print(f"  Level {lvl}: [{bar_color}]{pct}%[/]")
 
@@ -1832,6 +2099,7 @@ def fuzz(
 
     if json_output:
         import json as json_mod
+
         data = {
             "has_fuzzing": report.has_fuzzing,
             "framework": report.framework,
@@ -1846,9 +2114,16 @@ def fuzz(
         raise typer.Exit(0)
 
     if generate and report.starter_harness:
-        lang_ext = {"python": ".py", "go": "_test.go", "rust": ".rs",
-                     "c": ".c", "c++": ".cpp", "javascript": ".js",
-                     "typescript": ".ts", "java": ".java"}
+        lang_ext = {
+            "python": ".py",
+            "go": "_test.go",
+            "rust": ".rs",
+            "c": ".c",
+            "c++": ".cpp",
+            "javascript": ".js",
+            "typescript": ".ts",
+            "java": ".java",
+        }
         ext = lang_ext.get(report.language.lower(), ".txt")
         default_name = f"fuzz_target{ext}"
         target = output_file or default_name
@@ -1858,13 +2133,21 @@ def fuzz(
         raise typer.Exit(0)
 
     # Readiness gauge
-    r_color = "green" if report.readiness_score >= 70 else "yellow" if report.readiness_score >= 30 else "red"
+    r_color = (
+        "green"
+        if report.readiness_score >= 70
+        else "yellow"
+        if report.readiness_score >= 30
+        else "red"
+    )
     status = "Active" if report.has_fuzzing else "Not configured"
-    console.print(Panel(
-        f"[{r_color} bold]{report.readiness_score}%[/] ready — {status}"
-        + (f" ({report.framework})" if report.framework else ""),
-        title="[bold]Fuzz Readiness[/]",
-    ))
+    console.print(
+        Panel(
+            f"[{r_color} bold]{report.readiness_score}%[/] ready — {status}"
+            + (f" ({report.framework})" if report.framework else ""),
+            title="[bold]Fuzz Readiness[/]",
+        )
+    )
 
     if report.findings:
         for f in report.findings:

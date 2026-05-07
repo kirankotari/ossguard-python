@@ -38,26 +38,74 @@ class SupplyChainReport:
 # Well-known popular packages (for typosquatting detection)
 _POPULAR_PACKAGES = {
     "npm": [
-        "lodash", "express", "react", "vue", "angular", "axios", "moment",
-        "webpack", "babel", "eslint", "prettier", "typescript", "jquery",
-        "commander", "chalk", "inquirer", "minimist", "yargs", "debug",
-        "uuid", "dotenv", "cors", "helmet", "jsonwebtoken", "bcrypt",
-        "mongoose", "sequelize", "next", "nuxt", "gatsby", "svelte",
+        "lodash",
+        "express",
+        "react",
+        "vue",
+        "angular",
+        "axios",
+        "moment",
+        "webpack",
+        "babel",
+        "eslint",
+        "prettier",
+        "typescript",
+        "jquery",
+        "commander",
+        "chalk",
+        "inquirer",
+        "minimist",
+        "yargs",
+        "debug",
+        "uuid",
+        "dotenv",
+        "cors",
+        "helmet",
+        "jsonwebtoken",
+        "bcrypt",
+        "mongoose",
+        "sequelize",
+        "next",
+        "nuxt",
+        "gatsby",
+        "svelte",
     ],
     "pypi": [
-        "requests", "flask", "django", "numpy", "pandas", "scipy",
-        "matplotlib", "tensorflow", "torch", "scikit-learn", "boto3",
-        "pillow", "sqlalchemy", "celery", "redis", "fastapi", "uvicorn",
-        "pydantic", "pytest", "black", "mypy", "ruff", "httpx",
-        "cryptography", "paramiko", "beautifulsoup4", "scrapy",
+        "requests",
+        "flask",
+        "django",
+        "numpy",
+        "pandas",
+        "scipy",
+        "matplotlib",
+        "tensorflow",
+        "torch",
+        "scikit-learn",
+        "boto3",
+        "pillow",
+        "sqlalchemy",
+        "celery",
+        "redis",
+        "fastapi",
+        "uvicorn",
+        "pydantic",
+        "pytest",
+        "black",
+        "mypy",
+        "ruff",
+        "httpx",
+        "cryptography",
+        "paramiko",
+        "beautifulsoup4",
+        "scrapy",
     ],
 }
 
 # Known malicious name patterns
 _MALICIOUS_PATTERNS = [
-    (r'^@[a-z]+-pay(?:ment)?s?/', "Suspicious scoped payment package"),
-    (r'-exec$', "Package name ending in -exec (common malicious pattern)"),
-    (r'colors?\d+', "Suspicious color package variant"),
+    (r"^@[a-z]+-pay(?:ment)?s?/", "Suspicious scoped payment package"),
+    (r"-exec$", "Package name ending in -exec (common malicious pattern)"),
+    (r"colors?\d+", "Suspicious color package variant"),
 ]
 
 
@@ -119,16 +167,22 @@ def _check_osv_malicious(deps: list[Dependency], findings: list[SupplyChainFindi
             vulns = client.query(dep.name, dep.version or "", dep.ecosystem)
             for vuln in vulns:
                 # MAL- prefix indicates known malicious package
-                if vuln.id.startswith("MAL-") or vuln.id.startswith("PYSEC-") and "malicious" in vuln.summary.lower():
-                    findings.append(SupplyChainFinding(
-                        package=dep.name,
-                        version=dep.version,
-                        ecosystem=dep.ecosystem,
-                        finding_type="malicious",
-                        severity="critical",
-                        description=f"Known malicious package: {vuln.summary}",
-                        evidence=f"OSV: {vuln.id}",
-                    ))
+                if (
+                    vuln.id.startswith("MAL-")
+                    or vuln.id.startswith("PYSEC-")
+                    and "malicious" in vuln.summary.lower()
+                ):
+                    findings.append(
+                        SupplyChainFinding(
+                            package=dep.name,
+                            version=dep.version,
+                            ecosystem=dep.ecosystem,
+                            finding_type="malicious",
+                            severity="critical",
+                            description=f"Known malicious package: {vuln.summary}",
+                            evidence=f"OSV: {vuln.id}",
+                        )
+                    )
 
 
 def _check_typosquats(deps: list[Dependency], findings: list[SupplyChainFinding]) -> None:
@@ -140,15 +194,17 @@ def _check_typosquats(deps: list[Dependency], findings: list[SupplyChainFinding]
                 continue
             distance = _levenshtein_distance(dep.name.lower(), pop_name.lower())
             if 0 < distance <= 1 and len(dep.name) > 4:
-                findings.append(SupplyChainFinding(
-                    package=dep.name,
-                    version=dep.version,
-                    ecosystem=dep.ecosystem,
-                    finding_type="typosquat",
-                    severity="high",
-                    description=f"Name is similar to popular package '{pop_name}' (edit distance: {distance})",
-                    evidence=f"Levenshtein distance to '{pop_name}': {distance}",
-                ))
+                findings.append(
+                    SupplyChainFinding(
+                        package=dep.name,
+                        version=dep.version,
+                        ecosystem=dep.ecosystem,
+                        finding_type="typosquat",
+                        severity="high",
+                        description=f"Name is similar to popular package '{pop_name}' (edit distance: {distance})",
+                        evidence=f"Levenshtein distance to '{pop_name}': {distance}",
+                    )
+                )
                 break  # Only report the closest match
 
 
@@ -157,15 +213,17 @@ def _check_suspicious_patterns(deps: list[Dependency], findings: list[SupplyChai
     for dep in deps:
         for pattern, desc in _MALICIOUS_PATTERNS:
             if re.search(pattern, dep.name, re.IGNORECASE):
-                findings.append(SupplyChainFinding(
-                    package=dep.name,
-                    version=dep.version,
-                    ecosystem=dep.ecosystem,
-                    finding_type="suspicious",
-                    severity="medium",
-                    description=desc,
-                    evidence=f"Matched pattern: {pattern}",
-                ))
+                findings.append(
+                    SupplyChainFinding(
+                        package=dep.name,
+                        version=dep.version,
+                        ecosystem=dep.ecosystem,
+                        finding_type="suspicious",
+                        severity="medium",
+                        description=desc,
+                        evidence=f"Matched pattern: {pattern}",
+                    )
+                )
 
 
 def _check_empty_packages(deps: list[Dependency], findings: list[SupplyChainFinding]) -> None:
@@ -177,15 +235,17 @@ def _check_empty_packages(deps: list[Dependency], findings: list[SupplyChainFind
             # Scoped packages from unknown orgs
             org = dep.name.split("/")[0]
             if len(org) <= 3:  # Very short org names are suspicious
-                findings.append(SupplyChainFinding(
-                    package=dep.name,
-                    version=dep.version,
-                    ecosystem=dep.ecosystem,
-                    finding_type="suspicious",
-                    severity="low",
-                    description=f"Very short scoped package org name: {org}",
-                    evidence="Short org names may indicate placeholder squatting",
-                ))
+                findings.append(
+                    SupplyChainFinding(
+                        package=dep.name,
+                        version=dep.version,
+                        ecosystem=dep.ecosystem,
+                        finding_type="suspicious",
+                        severity="low",
+                        description=f"Very short scoped package org name: {org}",
+                        evidence="Short org names may indicate placeholder squatting",
+                    )
+                )
 
 
 def _levenshtein_distance(s1: str, s2: str) -> int:

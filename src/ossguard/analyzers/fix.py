@@ -80,9 +80,7 @@ def auto_fix(
                             details=f"{result.dep.version} → {vuln.fixed_version}",
                         )
                         if not dry_run:
-                            success = _bump_dependency(
-                                path, result.dep, vuln.fixed_version
-                            )
+                            success = _bump_dependency(path, result.dep, vuln.fixed_version)
                             action.applied = success
                             if success:
                                 applied += 1
@@ -104,6 +102,7 @@ def auto_fix(
             )
             if not dry_run:
                 from ossguard.generators.security_md import generate_security_md
+
                 content = generate_security_md(repo_name=info.repo_name)
                 (path / "SECURITY.md").write_text(content)
                 action.applied = True
@@ -120,6 +119,7 @@ def auto_fix(
             )
             if not dry_run:
                 from ossguard.generators.dependabot import generate_dependabot_config
+
                 content = generate_dependabot_config(info.package_managers)
                 dep_path = path / ".github" / "dependabot.yml"
                 dep_path.parent.mkdir(parents=True, exist_ok=True)
@@ -138,6 +138,7 @@ def auto_fix(
             )
             if not dry_run:
                 from ossguard.generators.scorecard import generate_scorecard_workflow
+
                 content = generate_scorecard_workflow()
                 sc_path = path / ".github" / "workflows" / "scorecard.yml"
                 sc_path.parent.mkdir(parents=True, exist_ok=True)
@@ -221,7 +222,7 @@ def _bump_requirements_txt(file_path: Path, name: str, new_version: str) -> bool
         updated = False
         new_lines = []
         for line in lines:
-            match = re.match(rf'^({re.escape(name)})\s*([><=~!]+)\s*[\d.*]+', line, re.IGNORECASE)
+            match = re.match(rf"^({re.escape(name)})\s*([><=~!]+)\s*[\d.*]+", line, re.IGNORECASE)
             if match:
                 pkg = match.group(1)
                 op = match.group(2)
@@ -251,7 +252,7 @@ def _bump_pyproject_toml(file_path: Path, name: str, new_version: str) -> bool:
             extras = match.group(1) or ""
             op = match.group(2)
             new_spec = f'"{name}{extras}{op}{new_version}"'
-            content = content[:match.start()] + new_spec + content[match.end():]
+            content = content[: match.start()] + new_spec + content[match.end() :]
             file_path.write_text(content)
             return True
     except Exception:
@@ -277,9 +278,7 @@ def _bump_cargo_toml(file_path: Path, name: str, new_version: str) -> bool:
     return False
 
 
-def _check_and_fix_npm_scripts(
-    project_path: Path, actions: list[FixAction], dry_run: bool
-) -> None:
+def _check_and_fix_npm_scripts(project_path: Path, actions: list[FixAction], dry_run: bool) -> None:
     """Check for insecure npm script patterns (e.g. no --ignore-scripts)."""
     npmrc = project_path / ".npmrc"
     if (project_path / "package.json").exists() and not npmrc.exists():
@@ -289,6 +288,8 @@ def _check_and_fix_npm_scripts(
             action_type="patch_config",
         )
         if not dry_run:
-            npmrc.write_text("# Security: prevent lifecycle script execution on install\nignore-scripts=true\n")
+            npmrc.write_text(
+                "# Security: prevent lifecycle script execution on install\nignore-scripts=true\n"
+            )
             action.applied = True
         actions.append(action)

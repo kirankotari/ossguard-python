@@ -53,8 +53,18 @@ class BaselineReport:
 _CONTROLS: list[tuple[str, str, str, int]] = [
     # --- Level 1 ---
     # Access Control
-    ("OSPS-AC-01", "Access Control", "Version control system MUST require MFA for collaborators", 1),
-    ("OSPS-AC-02", "Access Control", "Version control system MUST restrict who can push to release branches", 1),
+    (
+        "OSPS-AC-01",
+        "Access Control",
+        "Version control system MUST require MFA for collaborators",
+        1,
+    ),
+    (
+        "OSPS-AC-02",
+        "Access Control",
+        "Version control system MUST restrict who can push to release branches",
+        1,
+    ),
     # Build & Release
     ("OSPS-BR-01", "Build & Release", "Project MUST publish build/install instructions", 1),
     ("OSPS-BR-02", "Build & Release", "Project MUST use an automated build system", 1),
@@ -63,19 +73,38 @@ _CONTROLS: list[tuple[str, str, str, int]] = [
     ("OSPS-DO-02", "Documentation", "Project MUST document how to report security issues", 1),
     ("OSPS-DO-03", "Documentation", "Project MUST have a contribution guide", 1),
     # Governance
-    ("OSPS-GV-01", "Governance", "Project MUST have a defined governance model or maintainer list", 1),
+    (
+        "OSPS-GV-01",
+        "Governance",
+        "Project MUST have a defined governance model or maintainer list",
+        1,
+    ),
     # Legal
     ("OSPS-LE-01", "Legal", "Project MUST have an OSI-approved license", 1),
-    ("OSPS-LE-02", "Legal", "All source files SHOULD contain a license header or SPDX identifier", 1),
+    (
+        "OSPS-LE-02",
+        "Legal",
+        "All source files SHOULD contain a license header or SPDX identifier",
+        1,
+    ),
     # Quality
     ("OSPS-QA-01", "Quality", "Project MUST have an automated test suite", 1),
     ("OSPS-QA-02", "Quality", "Project MUST use CI to run tests on each change", 1),
     # Security Assessment
     ("OSPS-SA-01", "Security Assessment", "Project MUST use a static analysis tool", 1),
     # Vulnerability Management
-    ("OSPS-VM-01", "Vulnerability Management", "Project MUST monitor dependencies for known vulnerabilities", 1),
-    ("OSPS-VM-02", "Vulnerability Management", "Project MUST have a process to address reported vulnerabilities", 1),
-
+    (
+        "OSPS-VM-01",
+        "Vulnerability Management",
+        "Project MUST monitor dependencies for known vulnerabilities",
+        1,
+    ),
+    (
+        "OSPS-VM-02",
+        "Vulnerability Management",
+        "Project MUST have a process to address reported vulnerabilities",
+        1,
+    ),
     # --- Level 2 ---
     ("OSPS-AC-03", "Access Control", "Project MUST enforce branch protection on default branch", 2),
     ("OSPS-BR-03", "Build & Release", "Project MUST produce provenance metadata for releases", 2),
@@ -85,17 +114,36 @@ _CONTROLS: list[tuple[str, str, str, int]] = [
     ("OSPS-QA-03", "Quality", "Project MUST achieve adequate test coverage", 2),
     ("OSPS-SA-02", "Security Assessment", "Project MUST run SAST on each change (e.g., CodeQL)", 2),
     ("OSPS-SA-03", "Security Assessment", "Project MUST generate SBOMs for releases", 2),
-    ("OSPS-VM-03", "Vulnerability Management", "Project MUST fix critical/high vulns within defined SLAs", 2),
-    ("OSPS-LE-03", "Legal", "Project MUST include a NOTICE or attribution file for third-party code", 2),
-
+    (
+        "OSPS-VM-03",
+        "Vulnerability Management",
+        "Project MUST fix critical/high vulns within defined SLAs",
+        2,
+    ),
+    (
+        "OSPS-LE-03",
+        "Legal",
+        "Project MUST include a NOTICE or attribution file for third-party code",
+        2,
+    ),
     # --- Level 3 ---
     ("OSPS-AC-04", "Access Control", "Project MUST require signed commits on release branches", 3),
     ("OSPS-BR-05", "Build & Release", "Project MUST sign releases with Sigstore or equivalent", 3),
     ("OSPS-BR-06", "Build & Release", "Project MUST achieve SLSA Build Level 2+", 3),
-    ("OSPS-SA-04", "Security Assessment", "Project MUST have a fuzz testing framework configured", 3),
+    (
+        "OSPS-SA-04",
+        "Security Assessment",
+        "Project MUST have a fuzz testing framework configured",
+        3,
+    ),
     ("OSPS-SA-05", "Security Assessment", "Project MUST run dependency review on PRs", 3),
     ("OSPS-QA-04", "Quality", "Project MUST have reproducible builds", 3),
-    ("OSPS-VM-04", "Vulnerability Management", "Project MUST publish security advisories via GitHub/OSV", 3),
+    (
+        "OSPS-VM-04",
+        "Vulnerability Management",
+        "Project MUST publish security advisories via GitHub/OSV",
+        3,
+    ),
 ]
 
 
@@ -117,10 +165,17 @@ def check_baseline(project_path: str | Path, target_level: int = 3) -> BaselineR
         if level > target_level:
             continue
         status, evidence, rec = _check_control(ctrl_id, info, path)
-        controls.append(BaselineControl(
-            id=ctrl_id, family=family, title=title, level=level,
-            status=status, evidence=evidence, recommendation=rec,
-        ))
+        controls.append(
+            BaselineControl(
+                id=ctrl_id,
+                family=family,
+                title=title,
+                level=level,
+                status=status,
+                evidence=evidence,
+                recommendation=rec,
+            )
+        )
 
     l1_pass = sum(1 for c in controls if c.level == 1 and c.status == "pass")
     l1_total = sum(1 for c in controls if c.level == 1)
@@ -139,9 +194,12 @@ def check_baseline(project_path: str | Path, target_level: int = 3) -> BaselineR
 
     return BaselineReport(
         controls=controls,
-        level1_pass=l1_pass, level1_total=l1_total,
-        level2_pass=l2_pass, level2_total=l2_total,
-        level3_pass=l3_pass, level3_total=l3_total,
+        level1_pass=l1_pass,
+        level1_total=l1_total,
+        level2_pass=l2_pass,
+        level2_total=l2_total,
+        level3_pass=l3_pass,
+        level3_total=l3_total,
         achieved_level=achieved,
     )
 
@@ -183,7 +241,9 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
         readme = path / "README.md"
         if readme.exists():
             content = readme.read_text().lower()
-            if any(kw in content for kw in ["install", "build", "getting started", "setup", "usage"]):
+            if any(
+                kw in content for kw in ["install", "build", "getting started", "setup", "usage"]
+            ):
                 return "pass", "Build/install instructions found in README", ""
         return "fail", "", "Add build/install instructions to README.md"
 
@@ -213,7 +273,9 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
             for wf in wf_dir.iterdir():
                 if wf.suffix in (".yml", ".yaml"):
                     content = wf.read_text()
-                    if "@" in content and any(len(ref) == 40 for ref in _extract_action_refs(content)):
+                    if "@" in content and any(
+                        len(ref) == 40 for ref in _extract_action_refs(content)
+                    ):
                         return "pass", "Some actions pinned to commit SHAs", ""
         return "fail", "", "Pin GitHub Actions to commit SHAs — run `ossguard pin`"
 
@@ -228,7 +290,9 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
             for wf in wf_dir.iterdir():
                 if wf.suffix in (".yml", ".yaml"):
                     content = wf.read_text().lower()
-                    if "slsa" in content and ("level" in content or "l2" in content or "l3" in content):
+                    if "slsa" in content and (
+                        "level" in content or "l2" in content or "l3" in content
+                    ):
                         return "pass", "SLSA build level configuration found", ""
         return "fail", "", "Achieve SLSA Build Level 2+ for your release pipeline"
 
@@ -257,8 +321,12 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
         return "fail", "", "Create a CHANGELOG.md documenting changes"
 
     if ctrl_id == "OSPS-DO-05":
-        for name in ["SECURITY-INSIGHTS.yml", "security-insights.yml",
-                      ".github/security-insights.yml", ".github/SECURITY-INSIGHTS.yml"]:
+        for name in [
+            "SECURITY-INSIGHTS.yml",
+            "security-insights.yml",
+            ".github/security-insights.yml",
+            ".github/SECURITY-INSIGHTS.yml",
+        ]:
             if (path / name).exists():
                 return "pass", f"Found {name}", ""
         return "fail", "", "Generate security-insights.yml — run `ossguard insights`"
@@ -283,7 +351,9 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
         checked = 0
         with_spdx = 0
         for f in path.rglob("*"):
-            if f.suffix in exts and not any(p in str(f) for p in ["node_modules", "vendor", ".git", "venv"]):
+            if f.suffix in exts and not any(
+                p in str(f) for p in ["node_modules", "vendor", ".git", "venv"]
+            ):
                 checked += 1
                 try:
                     head = f.read_text(errors="ignore")[:500]
@@ -297,11 +367,20 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
             return "pass", f"{with_spdx}/{checked} sampled files have SPDX headers", ""
         if checked == 0:
             return "unknown", "", "No source files found to check"
-        return "fail", f"{with_spdx}/{checked} sampled files have SPDX headers", "Add SPDX-License-Identifier headers to source files"
+        return (
+            "fail",
+            f"{with_spdx}/{checked} sampled files have SPDX headers",
+            "Add SPDX-License-Identifier headers to source files",
+        )
 
     if ctrl_id == "OSPS-LE-03":
-        for name in ["NOTICE", "NOTICE.md", "THIRD-PARTY-NOTICES.txt", "THIRD_PARTY_NOTICES",
-                      "ThirdPartyNotices.txt"]:
+        for name in [
+            "NOTICE",
+            "NOTICE.md",
+            "THIRD-PARTY-NOTICES.txt",
+            "THIRD_PARTY_NOTICES",
+            "ThirdPartyNotices.txt",
+        ]:
             if (path / name).exists():
                 return "pass", f"Found {name}", ""
         return "fail", "", "Generate third-party notices — run `ossguard tpn`"
@@ -311,7 +390,11 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
         for td in ["tests", "test", "spec", "__tests__", "test_*.py"]:
             if (path / td).is_dir():
                 return "pass", f"Test directory '{td}' found", ""
-        if (path / "pytest.ini").exists() or (path / "jest.config.js").exists() or (path / "Cargo.toml").exists():
+        if (
+            (path / "pytest.ini").exists()
+            or (path / "jest.config.js").exists()
+            or (path / "Cargo.toml").exists()
+        ):
             return "pass", "Test configuration found", ""
         return "fail", "", "Add an automated test suite"
 
@@ -329,8 +412,15 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
 
     if ctrl_id == "OSPS-QA-03":
         # Check for coverage config
-        for name in [".coveragerc", "codecov.yml", ".codecov.yml", "coverage.xml",
-                      "jest.config.js", "tox.ini", "setup.cfg"]:
+        for name in [
+            ".coveragerc",
+            "codecov.yml",
+            ".codecov.yml",
+            "coverage.xml",
+            "jest.config.js",
+            "tox.ini",
+            "setup.cfg",
+        ]:
             if (path / name).exists():
                 return "pass", f"Coverage configuration found: {name}", ""
         return "unknown", "", "Configure and measure test coverage"
@@ -348,7 +438,10 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
             for wf in wf_dir.iterdir():
                 if wf.suffix in (".yml", ".yaml"):
                     content = wf.read_text().lower()
-                    if any(t in content for t in ["semgrep", "bandit", "eslint", "clippy", "gosec", "sonar"]):
+                    if any(
+                        t in content
+                        for t in ["semgrep", "bandit", "eslint", "clippy", "gosec", "sonar"]
+                    ):
                         return "pass", f"Static analysis found in {wf.name}", ""
         return "fail", "", "Add static analysis — run `ossguard init` for CodeQL"
 
@@ -364,8 +457,13 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
 
     if ctrl_id == "OSPS-SA-04":
         fuzz_markers = [
-            "fuzz", "oss-fuzz", ".clusterfuzzlite", "cargo-fuzz",
-            "go-fuzz", "jazzer", "atheris",
+            "fuzz",
+            "oss-fuzz",
+            ".clusterfuzzlite",
+            "cargo-fuzz",
+            "go-fuzz",
+            "jazzer",
+            "atheris",
         ]
         for marker in fuzz_markers:
             if (path / marker).exists() or (path / marker).is_dir():
@@ -418,5 +516,6 @@ def _check_control(ctrl_id: str, info: ProjectInfo, path: Path) -> tuple[str, st
 def _extract_action_refs(content: str) -> list[str]:
     """Extract action version refs from workflow content."""
     import re
-    refs = re.findall(r'uses:\s*[\w\-./]+@(\S+)', content)
+
+    refs = re.findall(r"uses:\s*[\w\-./]+@(\S+)", content)
     return refs

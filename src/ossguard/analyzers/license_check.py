@@ -44,19 +44,40 @@ class LicenseReport:
 
 # License classification database
 _PERMISSIVE = {
-    "MIT", "ISC", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0",
-    "0BSD", "Unlicense", "CC0-1.0", "Zlib", "BSL-1.0",
-    "MIT-0", "BlueOak-1.0.0",
+    "MIT",
+    "ISC",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Apache-2.0",
+    "0BSD",
+    "Unlicense",
+    "CC0-1.0",
+    "Zlib",
+    "BSL-1.0",
+    "MIT-0",
+    "BlueOak-1.0.0",
 }
 
 _WEAK_COPYLEFT = {
-    "LGPL-2.0", "LGPL-2.1", "LGPL-3.0", "MPL-2.0", "EPL-1.0", "EPL-2.0",
-    "CDDL-1.0", "OSL-3.0",
+    "LGPL-2.0",
+    "LGPL-2.1",
+    "LGPL-3.0",
+    "MPL-2.0",
+    "EPL-1.0",
+    "EPL-2.0",
+    "CDDL-1.0",
+    "OSL-3.0",
 }
 
 _STRONG_COPYLEFT = {
-    "GPL-2.0", "GPL-3.0", "AGPL-3.0", "GPL-2.0-only", "GPL-3.0-only",
-    "AGPL-3.0-only", "GPL-2.0-or-later", "GPL-3.0-or-later",
+    "GPL-2.0",
+    "GPL-3.0",
+    "AGPL-3.0",
+    "GPL-2.0-only",
+    "GPL-3.0-only",
+    "AGPL-3.0-only",
+    "GPL-2.0-or-later",
+    "GPL-3.0-or-later",
 }
 
 # Compatibility matrix: which project licenses allow which dependency licenses
@@ -105,13 +126,15 @@ def check_licenses(
             lic_str = info.license if info else ""
             category = _classify_license(lic_str)
 
-            licenses.append(LicenseInfo(
-                name=dep.name,
-                version=dep.version,
-                license=lic_str,
-                category=category,
-                ecosystem=dep.ecosystem,
-            ))
+            licenses.append(
+                LicenseInfo(
+                    name=dep.name,
+                    version=dep.version,
+                    license=lic_str,
+                    category=category,
+                    ecosystem=dep.ecosystem,
+                )
+            )
 
             if not lic_str or category == "unknown":
                 unknown.append(dep.name)
@@ -163,9 +186,7 @@ def _classify_license(license_str: str) -> str:
     return "unknown"
 
 
-def _detect_conflicts(
-    licenses: list[LicenseInfo], project_license: str
-) -> list[LicenseConflict]:
+def _detect_conflicts(licenses: list[LicenseInfo], project_license: str) -> list[LicenseConflict]:
     """Detect license conflicts between dependencies and the project license."""
     conflicts: list[LicenseConflict] = []
 
@@ -177,14 +198,16 @@ def _detect_conflicts(
 
         if copyleft_deps and permissive_deps:
             for cp in copyleft_deps[:3]:
-                conflicts.append(LicenseConflict(
-                    package_a=cp.name,
-                    license_a=cp.license,
-                    package_b="(project)",
-                    license_b="unknown",
-                    reason=f"{cp.name} uses copyleft license {cp.license}. "
-                           "Ensure your project license is compatible.",
-                ))
+                conflicts.append(
+                    LicenseConflict(
+                        package_a=cp.name,
+                        license_a=cp.license,
+                        package_b="(project)",
+                        license_b="unknown",
+                        reason=f"{cp.name} uses copyleft license {cp.license}. "
+                        "Ensure your project license is compatible.",
+                    )
+                )
         return conflicts
 
     # Check each dep against project license
@@ -199,13 +222,15 @@ def _detect_conflicts(
 
         is_compatible = compat.get(dep_lic.category, True)
         if not is_compatible:
-            conflicts.append(LicenseConflict(
-                package_a=dep_lic.name,
-                license_a=dep_lic.license,
-                package_b="(project)",
-                license_b=project_license,
-                reason=f"{dep_lic.name} ({dep_lic.license}, {dep_lic.category}) "
-                       f"is incompatible with project license {project_license}.",
-            ))
+            conflicts.append(
+                LicenseConflict(
+                    package_a=dep_lic.name,
+                    license_a=dep_lic.license,
+                    package_b="(project)",
+                    license_b=project_license,
+                    reason=f"{dep_lic.name} ({dep_lic.license}, {dep_lic.category}) "
+                    f"is incompatible with project license {project_license}.",
+                )
+            )
 
     return conflicts

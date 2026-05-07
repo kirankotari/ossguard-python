@@ -34,17 +34,22 @@ class AuditReport:
         return int((self.config_score / self.config_total) * 100)
 
     def to_json(self) -> str:
-        return json.dumps({
-            "audit_time": self.audit_time,
-            "overall_grade": self.overall_grade,
-            "config_score": f"{self.config_score}/{self.config_total}",
-            "dep_health_score": self.dep_health.aggregate_score if self.dep_health else None,
-            "total_vulns": self.dep_health.total_vulns if self.dep_health else 0,
-            "reachable_vulns": self.reachability.reachable_vulns if self.reachability else 0,
-            "noise_reduction": self.reachability.noise_reduction_pct if self.reachability else 0,
-            "findings": self.findings,
-            "recommendations": self.recommendations,
-        }, indent=2)
+        return json.dumps(
+            {
+                "audit_time": self.audit_time,
+                "overall_grade": self.overall_grade,
+                "config_score": f"{self.config_score}/{self.config_total}",
+                "dep_health_score": self.dep_health.aggregate_score if self.dep_health else None,
+                "total_vulns": self.dep_health.total_vulns if self.dep_health else 0,
+                "reachable_vulns": self.reachability.reachable_vulns if self.reachability else 0,
+                "noise_reduction": self.reachability.noise_reduction_pct
+                if self.reachability
+                else 0,
+                "findings": self.findings,
+                "recommendations": self.recommendations,
+            },
+            indent=2,
+        )
 
 
 def run_audit(project_path: str | Path) -> AuditReport:
@@ -104,9 +109,7 @@ def run_audit(project_path: str | Path) -> AuditReport:
         report.dep_health = dep_report
 
         if dep_report.critical_vulns > 0:
-            findings.append(
-                f"{dep_report.critical_vulns} CRITICAL vulnerabilities in dependencies"
-            )
+            findings.append(f"{dep_report.critical_vulns} CRITICAL vulnerabilities in dependencies")
             recommendations.append("Immediately update packages with critical vulns")
         if dep_report.high_vulns > 0:
             findings.append(f"{dep_report.high_vulns} HIGH severity vulnerabilities")

@@ -95,21 +95,25 @@ def analyze_reachability(
         vulns = vuln_map.get(dep.name, [])
         total_vulns += len(vulns)
         reachable_vulns += len(vulns)
-        results.append(ReachResult(
-            dep=dep,
-            is_reachable=True,
-            import_locations=locations,
-            vulns=vulns,
-        ))
+        results.append(
+            ReachResult(
+                dep=dep,
+                is_reachable=True,
+                import_locations=locations,
+                vulns=vulns,
+            )
+        )
 
     for dep in unreachable_deps:
         vulns = vuln_map.get(dep.name, [])
         total_vulns += len(vulns)
-        results.append(ReachResult(
-            dep=dep,
-            is_reachable=False,
-            vulns=vulns,
-        ))
+        results.append(
+            ReachResult(
+                dep=dep,
+                is_reachable=False,
+                vulns=vulns,
+            )
+        )
 
     # Sort: reachable with vulns first
     results.sort(key=lambda r: (not r.is_reachable, -r.vuln_count))
@@ -135,31 +139,31 @@ def _scan_imports(project_path: Path) -> dict[str, list[str]]:
     # Define file extensions and their import patterns
     patterns = {
         ".py": [
-            re.compile(r'^import\s+(\w+)'),
-            re.compile(r'^from\s+(\w+)'),
+            re.compile(r"^import\s+(\w+)"),
+            re.compile(r"^from\s+(\w+)"),
         ],
         ".js": [
-            re.compile(r'''require\s*\(\s*['"]([^'"./][^'"]*)['"]\s*\)'''),
-            re.compile(r'''from\s+['"]([^'"./][^'"]*)['"]\s*'''),
-            re.compile(r'''import\s+['"]([^'"./][^'"]*)['"]\s*'''),
+            re.compile(r"""require\s*\(\s*['"]([^'"./][^'"]*)['"]\s*\)"""),
+            re.compile(r"""from\s+['"]([^'"./][^'"]*)['"]\s*"""),
+            re.compile(r"""import\s+['"]([^'"./][^'"]*)['"]\s*"""),
         ],
         ".ts": [
-            re.compile(r'''from\s+['"]([^'"./][^'"]*)['"]\s*'''),
-            re.compile(r'''import\s+['"]([^'"./][^'"]*)['"]\s*'''),
+            re.compile(r"""from\s+['"]([^'"./][^'"]*)['"]\s*"""),
+            re.compile(r"""import\s+['"]([^'"./][^'"]*)['"]\s*"""),
         ],
         ".go": [
             re.compile(r'"([a-zA-Z0-9._/-]+)"'),
         ],
         ".rs": [
-            re.compile(r'^use\s+(\w+)'),
-            re.compile(r'^extern\s+crate\s+(\w+)'),
+            re.compile(r"^use\s+(\w+)"),
+            re.compile(r"^extern\s+crate\s+(\w+)"),
         ],
         ".rb": [
             re.compile(r"^require\s+['\"]([^'\"]+)['\"]"),
             re.compile(r"^gem\s+['\"]([^'\"]+)['\"]"),
         ],
         ".java": [
-            re.compile(r'^import\s+(?:static\s+)?([a-zA-Z0-9_.]+)'),
+            re.compile(r"^import\s+(?:static\s+)?([a-zA-Z0-9_.]+)"),
         ],
     }
 
@@ -170,8 +174,18 @@ def _scan_imports(project_path: Path) -> dict[str, list[str]]:
 
     # Walk source files (skip common non-source dirs)
     skip_dirs = {
-        "node_modules", ".git", "__pycache__", "venv", ".venv", "env",
-        "dist", "build", ".tox", ".mypy_cache", "target", "vendor",
+        "node_modules",
+        ".git",
+        "__pycache__",
+        "venv",
+        ".venv",
+        "env",
+        "dist",
+        "build",
+        ".tox",
+        ".mypy_cache",
+        "target",
+        "vendor",
     }
 
     for file_path in _walk_files(project_path, skip_dirs):

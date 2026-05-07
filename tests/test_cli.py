@@ -1,6 +1,5 @@
 """Tests for the CLI commands."""
 
-
 from typer.testing import CliRunner
 
 from ossguard.cli import app

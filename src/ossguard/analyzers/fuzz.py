@@ -108,11 +108,19 @@ def _detect_existing_fuzz(path: Path, info: ProjectInfo) -> tuple[bool, str, lis
                 if "atheris" in content:
                     has_fuzz = True
                     framework = "Atheris"
-                    findings.append(FuzzFinding("existing", f"Atheris fuzzer found in {py_file.name}", str(py_file)))
+                    findings.append(
+                        FuzzFinding(
+                            "existing", f"Atheris fuzzer found in {py_file.name}", str(py_file)
+                        )
+                    )
                 if "hypothesis" in content and "@given" in content:
                     has_fuzz = True
                     framework = framework or "Hypothesis"
-                    findings.append(FuzzFinding("existing", f"Hypothesis property tests in {py_file.name}", str(py_file)))
+                    findings.append(
+                        FuzzFinding(
+                            "existing", f"Hypothesis property tests in {py_file.name}", str(py_file)
+                        )
+                    )
             except Exception:
                 continue
 
@@ -124,7 +132,11 @@ def _detect_existing_fuzz(path: Path, info: ProjectInfo) -> tuple[bool, str, lis
                 if "func Fuzz" in content:
                     has_fuzz = True
                     framework = "Go native fuzzing"
-                    findings.append(FuzzFinding("existing", f"Go fuzz function found in {go_file.name}", str(go_file)))
+                    findings.append(
+                        FuzzFinding(
+                            "existing", f"Go fuzz function found in {go_file.name}", str(go_file)
+                        )
+                    )
             except Exception:
                 continue
 
@@ -149,7 +161,9 @@ def _detect_existing_fuzz(path: Path, info: ProjectInfo) -> tuple[bool, str, lis
                     if "LLVMFuzzerTestOneInput" in content:
                         has_fuzz = True
                         framework = "libFuzzer"
-                        findings.append(FuzzFinding("existing", f"libFuzzer harness in {src.name}", str(src)))
+                        findings.append(
+                            FuzzFinding("existing", f"libFuzzer harness in {src.name}", str(src))
+                        )
                 except Exception:
                     continue
 
@@ -158,6 +172,7 @@ def _detect_existing_fuzz(path: Path, info: ProjectInfo) -> tuple[bool, str, lis
         pkg_json = path / "package.json"
         if pkg_json.exists():
             import json
+
             try:
                 data = json.loads(pkg_json.read_text())
                 all_deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
@@ -180,7 +195,11 @@ def _detect_existing_fuzz(path: Path, info: ProjectInfo) -> tuple[bool, str, lis
                 if "com.code_intelligence.jazzer" in content or "@FuzzTest" in content:
                     has_fuzz = True
                     framework = "Jazzer"
-                    findings.append(FuzzFinding("existing", f"Jazzer fuzz test in {java_file.name}", str(java_file)))
+                    findings.append(
+                        FuzzFinding(
+                            "existing", f"Jazzer fuzz test in {java_file.name}", str(java_file)
+                        )
+                    )
             except Exception:
                 continue
 
@@ -207,7 +226,9 @@ def _check_clusterfuzzlite(path: Path) -> list[FuzzFinding]:
     findings = []
     cfl_dir = path / ".clusterfuzzlite"
     if cfl_dir.is_dir():
-        findings.append(FuzzFinding("existing", "ClusterFuzzLite configuration found", ".clusterfuzzlite/"))
+        findings.append(
+            FuzzFinding("existing", "ClusterFuzzLite configuration found", ".clusterfuzzlite/")
+        )
 
     wf_dir = path / ".github" / "workflows"
     if wf_dir.is_dir():
@@ -216,7 +237,9 @@ def _check_clusterfuzzlite(path: Path) -> list[FuzzFinding]:
                 try:
                     content = wf.read_text().lower()
                     if "clusterfuzzlite" in content:
-                        findings.append(FuzzFinding("existing", f"ClusterFuzzLite workflow: {wf.name}", str(wf)))
+                        findings.append(
+                            FuzzFinding("existing", f"ClusterFuzzLite workflow: {wf.name}", str(wf))
+                        )
                 except Exception:
                     pass
 
@@ -233,7 +256,9 @@ def _check_fuzz_ci(path: Path) -> list[FuzzFinding]:
                 try:
                     content = wf.read_text().lower()
                     if "fuzz" in content and ("run:" in content or "uses:" in content):
-                        findings.append(FuzzFinding("existing", f"Fuzz CI workflow: {wf.name}", str(wf)))
+                        findings.append(
+                            FuzzFinding("existing", f"Fuzz CI workflow: {wf.name}", str(wf))
+                        )
                 except Exception:
                     pass
 
@@ -248,7 +273,10 @@ def _generate_recommendations(lang: str, info: ProjectInfo) -> list[FuzzFinding]
     recommendations = {
         "python": [
             ("recommendation", "Install Atheris for Python fuzzing: pip install atheris"),
-            ("recommendation", "Consider Hypothesis for property-based testing: pip install hypothesis"),
+            (
+                "recommendation",
+                "Consider Hypothesis for property-based testing: pip install hypothesis",
+            ),
             ("recommendation", "Apply to OSS-Fuzz for continuous fuzzing coverage"),
         ],
         "go": [
@@ -270,7 +298,10 @@ def _generate_recommendations(lang: str, info: ProjectInfo) -> list[FuzzFinding]
             ("recommendation", "Consider fast-check for property-based testing"),
         ],
         "java": [
-            ("recommendation", "Use Jazzer for Java fuzzing: add com.code_intelligence:jazzer-junit"),
+            (
+                "recommendation",
+                "Use Jazzer for Java fuzzing: add com.code_intelligence:jazzer-junit",
+            ),
             ("recommendation", "Annotate fuzz test methods with @FuzzTest"),
         ],
         "c": [
@@ -289,10 +320,12 @@ def _generate_recommendations(lang: str, info: ProjectInfo) -> list[FuzzFinding]
         findings.append(FuzzFinding(cat, desc))
 
     # Universal recommendation
-    findings.append(FuzzFinding(
-        "recommendation",
-        "Set up ClusterFuzzLite for CI-integrated fuzzing: https://google.github.io/clusterfuzzlite/",
-    ))
+    findings.append(
+        FuzzFinding(
+            "recommendation",
+            "Set up ClusterFuzzLite for CI-integrated fuzzing: https://google.github.io/clusterfuzzlite/",
+        )
+    )
 
     return findings
 
@@ -326,7 +359,7 @@ if __name__ == "__main__":
 '''
 
     elif lang_lower == "go":
-        return '''package mypackage
+        return """package mypackage
 
 import "testing"
 
@@ -343,10 +376,10 @@ func FuzzParseInput(f *testing.F) {
 		// We don't check err — we're looking for panics
 	})
 }
-'''
+"""
 
     elif lang_lower == "rust":
-        return '''#![no_main]
+        return """#![no_main]
 use libfuzzer_sys::fuzz_target;
 
 // Import your crate here
@@ -358,10 +391,10 @@ fuzz_target!(|data: &[u8]| {
         // let _ = parse(s);
     }
 });
-'''
+"""
 
     elif lang_lower in ("c", "c++"):
-        return '''#include <stdint.h>
+        return """#include <stdint.h>
 #include <stddef.h>
 
 // Include your headers here
@@ -372,10 +405,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     // parse_input(data, size);
     return 0;
 }
-'''
+"""
 
     elif lang_lower in ("javascript", "typescript"):
-        return '''// Fuzz test using Jazzer.js — customize for your project
+        return """// Fuzz test using Jazzer.js — customize for your project
 // npm install --save-dev @jazzer.js/core
 
 const { fuzz } = require("@jazzer.js/core");
@@ -388,10 +421,10 @@ fuzz((data) => {
   // Replace with your function under test
   // parseInput(input);
 });
-'''
+"""
 
     elif lang_lower in ("java", "kotlin"):
-        return '''import com.code_intelligence.jazzer.api.FuzzedDataProvider;
+        return """import com.code_intelligence.jazzer.api.FuzzedDataProvider;
 import com.code_intelligence.jazzer.junit.FuzzTest;
 
 // Import your class here
@@ -405,6 +438,6 @@ class FuzzTests {
         // Parser.parse(input);
     }
 }
-'''
+"""
 
     return "# No starter harness available for this language.\n# See https://google.github.io/clusterfuzzlite/ for setup guides.\n"

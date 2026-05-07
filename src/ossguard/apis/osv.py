@@ -81,9 +81,7 @@ class OSVClient:
         except Exception:
             return []
 
-    def query_batch(
-        self, packages: list[tuple[str, str, str]]
-    ) -> dict[str, list[VulnInfo]]:
+    def query_batch(self, packages: list[tuple[str, str, str]]) -> dict[str, list[VulnInfo]]:
         """Query vulnerabilities for multiple packages in one request.
 
         Args:
@@ -131,14 +129,16 @@ def _parse_vulns(vulns: list[dict]) -> list[VulnInfo]:
         aliases = v.get("aliases", [])
         fixed = _extract_fixed_version(v)
 
-        parsed.append(VulnInfo(
-            id=v.get("id", ""),
-            summary=v.get("summary", "")[:120],
-            severity=severity,
-            aliases=aliases,
-            fixed_version=fixed,
-            url=f"https://osv.dev/vulnerability/{v.get('id', '')}",
-        ))
+        parsed.append(
+            VulnInfo(
+                id=v.get("id", ""),
+                summary=v.get("summary", "")[:120],
+                severity=severity,
+                aliases=aliases,
+                fixed_version=fixed,
+                url=f"https://osv.dev/vulnerability/{v.get('id', '')}",
+            )
+        )
 
     return parsed
 

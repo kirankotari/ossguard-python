@@ -114,19 +114,21 @@ def check_updates(
             if vuln_count > 0 or has_fix:
                 security_count += 1
 
-            candidates.append(UpdateCandidate(
-                name=dep.name,
-                current_version=current,
-                latest_version=latest,
-                ecosystem=dep.ecosystem,
-                source_file=dep.source_file,
-                vuln_count=vuln_count,
-                critical_vulns=critical,
-                high_vulns=high,
-                has_security_fix=has_fix,
-                priority=priority,
-                reason=reason,
-            ))
+            candidates.append(
+                UpdateCandidate(
+                    name=dep.name,
+                    current_version=current,
+                    latest_version=latest,
+                    ecosystem=dep.ecosystem,
+                    source_file=dep.source_file,
+                    vuln_count=vuln_count,
+                    critical_vulns=critical,
+                    high_vulns=high,
+                    has_security_fix=has_fix,
+                    priority=priority,
+                    reason=reason,
+                )
+            )
 
     # Sort by priority
     priority_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}

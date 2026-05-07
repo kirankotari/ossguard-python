@@ -7,7 +7,6 @@ import json
 from unittest.mock import MagicMock, patch
 
 
-
 # ---------------------------------------------------------------------------
 # Baseline
 # ---------------------------------------------------------------------------
@@ -74,7 +73,11 @@ class TestInsights:
         from ossguard.analyzers.insights import validate_insights
 
         data = {
-            "header": {"schema-version": "1.0.0", "expiry-date": "2027-01-01", "last-updated": "2026-01-01"},
+            "header": {
+                "schema-version": "1.0.0",
+                "expiry-date": "2027-01-01",
+                "last-updated": "2026-01-01",
+            },
             "project-lifecycle": {"status": "active"},
             "vulnerability-reporting": {"accepts-vulnerability-reports": True},
         }
@@ -123,8 +126,7 @@ class TestPin:
         wf_dir.mkdir(parents=True)
         sha = "a" * 40
         (wf_dir / "ci.yml").write_text(
-            f"jobs:\n  build:\n    steps:\n"
-            f"      - uses: actions/checkout@{sha}\n"
+            f"jobs:\n  build:\n    steps:\n      - uses: actions/checkout@{sha}\n"
         )
 
         report = scan_actions(tmp_path)
@@ -161,7 +163,9 @@ class TestSecrets:
     def test_detect_private_key(self, tmp_path):
         from ossguard.analyzers.secrets import scan_secrets
 
-        (tmp_path / "key.pem").write_text("-----BEGIN RSA PRIVATE KEY-----\nblah\n-----END RSA PRIVATE KEY-----\n")
+        (tmp_path / "key.pem").write_text(
+            "-----BEGIN RSA PRIVATE KEY-----\nblah\n-----END RSA PRIVATE KEY-----\n"
+        )
         report = scan_secrets(tmp_path)
         assert any(f.rule_id == "private-key-rsa" for f in report.findings)
 
@@ -197,7 +201,9 @@ class TestSLSA:
 
         wf_dir = tmp_path / ".github" / "workflows"
         wf_dir.mkdir(parents=True)
-        (wf_dir / "ci.yml").write_text("name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n")
+        (wf_dir / "ci.yml").write_text(
+            "name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n"
+        )
         report = check_slsa(tmp_path)
         # Should at least meet CI requirement
         ci_req = [r for r in report.requirements if r.id == "slsa-l1-ci"]
@@ -233,9 +239,9 @@ class TestSBOMGen:
     def test_cyclonedx_generation(self, tmp_path):
         from ossguard.analyzers.sbom_gen import generate_sbom
 
-        (tmp_path / "package.json").write_text(json.dumps({
-            "dependencies": {"express": "4.18.0", "lodash": "4.17.21"}
-        }))
+        (tmp_path / "package.json").write_text(
+            json.dumps({"dependencies": {"express": "4.18.0", "lodash": "4.17.21"}})
+        )
         content = generate_sbom(tmp_path, sbom_format="cyclonedx")
         data = json.loads(content)
         assert data["bomFormat"] == "CycloneDX"
@@ -314,7 +320,9 @@ class TestContainer:
     def test_detect_no_user(self, tmp_path):
         from ossguard.analyzers.container import scan_containers
 
-        (tmp_path / "Dockerfile").write_text("FROM python:3.12\nCOPY . /app\nCMD ['python', 'app.py']\n")
+        (tmp_path / "Dockerfile").write_text(
+            "FROM python:3.12\nCOPY . /app\nCMD ['python', 'app.py']\n"
+        )
         report = scan_containers(tmp_path)
         user_findings = [f for f in report.findings if f.rule_id == "DL-010"]
         assert len(user_findings) >= 1
@@ -323,9 +331,7 @@ class TestContainer:
         from ossguard.analyzers.container import scan_containers
 
         (tmp_path / "Dockerfile").write_text(
-            "FROM python:3.12\n"
-            "ARG SECRET_KEY=mysupersecret123\n"
-            "USER nobody\n"
+            "FROM python:3.12\nARG SECRET_KEY=mysupersecret123\nUSER nobody\n"
         )
         report = scan_containers(tmp_path)
         assert any(f.rule_id == "DL-020" for f in report.findings)
@@ -334,9 +340,7 @@ class TestContainer:
         from ossguard.analyzers.container import scan_containers
 
         (tmp_path / "Dockerfile").write_text(
-            "FROM ubuntu:22.04\n"
-            "RUN curl -s https://example.com/script.sh | bash\n"
-            "USER app\n"
+            "FROM ubuntu:22.04\nRUN curl -s https://example.com/script.sh | bash\nUSER app\n"
         )
         report = scan_containers(tmp_path)
         assert any(f.rule_id == "DL-032" for f in report.findings)
@@ -462,9 +466,7 @@ class TestFuzz:
 
         (tmp_path / "pyproject.toml").write_text('[project]\nname = "test"\n')
         (tmp_path / "fuzz_test.py").write_text(
-            "import atheris\nimport sys\n\n"
-            "@atheris.instrument_func\n"
-            "def fuzz(data):\n    pass\n"
+            "import atheris\nimport sys\n\n@atheris.instrument_func\ndef fuzz(data):\n    pass\n"
         )
 
         report = check_fuzz_readiness(tmp_path)
@@ -477,7 +479,7 @@ class TestFuzz:
 
         (tmp_path / "go.mod").write_text("module example.com/mymod\ngo 1.21\n")
         (tmp_path / "fuzz_test.go").write_text(
-            "package mymod\n\nimport \"testing\"\n\n"
+            'package mymod\n\nimport "testing"\n\n'
             "func FuzzParse(f *testing.F) {\n\tf.Fuzz(func(t *testing.T, data []byte) {})\n}\n"
         )
 

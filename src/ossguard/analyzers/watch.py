@@ -47,33 +47,36 @@ class WatchReport:
 
     def to_json(self) -> str:
         """Export report as JSON."""
-        return json.dumps({
-            "sbom_path": self.sbom_path,
-            "sbom_name": self.sbom_name,
-            "scan_time": self.scan_time,
-            "total_components": self.total_components,
-            "affected_components": self.affected_components,
-            "total_vulns": self.total_vulns,
-            "alerts": [
-                {
-                    "package": a.package_name,
-                    "version": a.package_version,
-                    "ecosystem": a.ecosystem,
-                    "max_severity": a.max_severity,
-                    "vulns": [
-                        {
-                            "id": v.id,
-                            "severity": v.severity,
-                            "summary": v.summary,
-                            "fixed_version": v.fixed_version,
-                            "url": v.url,
-                        }
-                        for v in a.vulns
-                    ],
-                }
-                for a in self.alerts
-            ],
-        }, indent=2)
+        return json.dumps(
+            {
+                "sbom_path": self.sbom_path,
+                "sbom_name": self.sbom_name,
+                "scan_time": self.scan_time,
+                "total_components": self.total_components,
+                "affected_components": self.affected_components,
+                "total_vulns": self.total_vulns,
+                "alerts": [
+                    {
+                        "package": a.package_name,
+                        "version": a.package_version,
+                        "ecosystem": a.ecosystem,
+                        "max_severity": a.max_severity,
+                        "vulns": [
+                            {
+                                "id": v.id,
+                                "severity": v.severity,
+                                "summary": v.summary,
+                                "fixed_version": v.fixed_version,
+                                "url": v.url,
+                            }
+                            for v in a.vulns
+                        ],
+                    }
+                    for a in self.alerts
+                ],
+            },
+            indent=2,
+        )
 
 
 def watch_sbom(sbom_path: str | Path) -> WatchReport:
@@ -104,12 +107,14 @@ def watch_sbom(sbom_path: str | Path) -> WatchReport:
     for dep in sbom.dependencies:
         vulns = vuln_map.get(dep.name, [])
         if vulns:
-            alerts.append(WatchAlert(
-                package_name=dep.name,
-                package_version=dep.version,
-                ecosystem=dep.ecosystem,
-                vulns=vulns,
-            ))
+            alerts.append(
+                WatchAlert(
+                    package_name=dep.name,
+                    package_version=dep.version,
+                    ecosystem=dep.ecosystem,
+                    vulns=vulns,
+                )
+            )
             total_vulns += len(vulns)
 
     # Sort by severity

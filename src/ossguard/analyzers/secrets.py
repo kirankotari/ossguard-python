@@ -42,89 +42,166 @@ class SecretsReport:
 # Secret detection rules: (id, description, pattern, severity)
 _RULES: list[tuple[str, str, str, str]] = [
     # API Keys
-    ("aws-access-key", "AWS Access Key ID",
-     r'(?:AKIA)[0-9A-Z]{16}', "critical"),
-    ("aws-secret-key", "AWS Secret Access Key",
-     r'(?:aws_secret_access_key|AWS_SECRET_ACCESS_KEY)\s*[=:]\s*["\']?([A-Za-z0-9/+=]{40})', "critical"),
-    ("gcp-api-key", "Google Cloud API Key",
-     r'AIza[0-9A-Za-z\-_]{35}', "critical"),
-    ("gcp-service-account", "Google Cloud Service Account Key",
-     r'"type"\s*:\s*"service_account"', "critical"),
-    ("azure-storage-key", "Azure Storage Account Key",
-     r'DefaultEndpointsProtocol=https;AccountName=[^;]+;AccountKey=[A-Za-z0-9+/=]{88}', "critical"),
-
+    ("aws-access-key", "AWS Access Key ID", r"(?:AKIA)[0-9A-Z]{16}", "critical"),
+    (
+        "aws-secret-key",
+        "AWS Secret Access Key",
+        r'(?:aws_secret_access_key|AWS_SECRET_ACCESS_KEY)\s*[=:]\s*["\']?([A-Za-z0-9/+=]{40})',
+        "critical",
+    ),
+    ("gcp-api-key", "Google Cloud API Key", r"AIza[0-9A-Za-z\-_]{35}", "critical"),
+    (
+        "gcp-service-account",
+        "Google Cloud Service Account Key",
+        r'"type"\s*:\s*"service_account"',
+        "critical",
+    ),
+    (
+        "azure-storage-key",
+        "Azure Storage Account Key",
+        r"DefaultEndpointsProtocol=https;AccountName=[^;]+;AccountKey=[A-Za-z0-9+/=]{88}",
+        "critical",
+    ),
     # Tokens
-    ("github-token", "GitHub Personal Access Token",
-     r'gh[ps]_[A-Za-z0-9_]{36,}', "critical"),
-    ("github-fine-grained", "GitHub Fine-Grained Token",
-     r'github_pat_[A-Za-z0-9_]{22,}', "critical"),
-    ("gitlab-token", "GitLab Token",
-     r'glpat-[A-Za-z0-9\-_]{20,}', "high"),
-    ("slack-token", "Slack Token",
-     r'xox[bpors]-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,}', "high"),
-    ("slack-webhook", "Slack Webhook URL",
-     r'https://hooks\.slack\.com/services/T[A-Z0-9]{8,}/B[A-Z0-9]{8,}/[a-zA-Z0-9]{24,}', "high"),
-    ("npm-token", "npm Access Token",
-     r'npm_[A-Za-z0-9]{36}', "critical"),
-    ("pypi-token", "PyPI API Token",
-     r'pypi-[A-Za-z0-9_\-]{100,}', "critical"),
-
+    ("github-token", "GitHub Personal Access Token", r"gh[ps]_[A-Za-z0-9_]{36,}", "critical"),
+    (
+        "github-fine-grained",
+        "GitHub Fine-Grained Token",
+        r"github_pat_[A-Za-z0-9_]{22,}",
+        "critical",
+    ),
+    ("gitlab-token", "GitLab Token", r"glpat-[A-Za-z0-9\-_]{20,}", "high"),
+    (
+        "slack-token",
+        "Slack Token",
+        r"xox[bpors]-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,}",
+        "high",
+    ),
+    (
+        "slack-webhook",
+        "Slack Webhook URL",
+        r"https://hooks\.slack\.com/services/T[A-Z0-9]{8,}/B[A-Z0-9]{8,}/[a-zA-Z0-9]{24,}",
+        "high",
+    ),
+    ("npm-token", "npm Access Token", r"npm_[A-Za-z0-9]{36}", "critical"),
+    ("pypi-token", "PyPI API Token", r"pypi-[A-Za-z0-9_\-]{100,}", "critical"),
     # Private Keys
-    ("private-key-rsa", "RSA Private Key",
-     r'-----BEGIN RSA PRIVATE KEY-----', "critical"),
-    ("private-key-openssh", "OpenSSH Private Key",
-     r'-----BEGIN OPENSSH PRIVATE KEY-----', "critical"),
-    ("private-key-ec", "EC Private Key",
-     r'-----BEGIN EC PRIVATE KEY-----', "critical"),
-    ("private-key-pgp", "PGP Private Key Block",
-     r'-----BEGIN PGP PRIVATE KEY BLOCK-----', "high"),
-
+    ("private-key-rsa", "RSA Private Key", r"-----BEGIN RSA PRIVATE KEY-----", "critical"),
+    (
+        "private-key-openssh",
+        "OpenSSH Private Key",
+        r"-----BEGIN OPENSSH PRIVATE KEY-----",
+        "critical",
+    ),
+    ("private-key-ec", "EC Private Key", r"-----BEGIN EC PRIVATE KEY-----", "critical"),
+    ("private-key-pgp", "PGP Private Key Block", r"-----BEGIN PGP PRIVATE KEY BLOCK-----", "high"),
     # Database / Connection strings
-    ("database-url", "Database Connection String with Credentials",
-     r'(?:postgres|mysql|mongodb|redis)://[^:]+:[^@]+@[^/\s]+', "high"),
-    ("jdbc-password", "JDBC Connection with Password",
-     r'jdbc:[a-z]+://[^\s]*password=[^\s&]+', "high"),
-
+    (
+        "database-url",
+        "Database Connection String with Credentials",
+        r"(?:postgres|mysql|mongodb|redis)://[^:]+:[^@]+@[^/\s]+",
+        "high",
+    ),
+    (
+        "jdbc-password",
+        "JDBC Connection with Password",
+        r"jdbc:[a-z]+://[^\s]*password=[^\s&]+",
+        "high",
+    ),
     # Generic patterns
-    ("generic-secret-assignment", "Hardcoded Secret Assignment",
-     r'(?:secret|password|passwd|token|api_key|apikey|api-key|access_key|auth_token|credentials)'
-     r'\s*[=:]\s*["\'][A-Za-z0-9+/=_\-]{16,}["\']', "medium"),
-    ("generic-bearer-token", "Hardcoded Bearer Token",
-     r'[Bb]earer\s+[A-Za-z0-9\-._~+/]+=*', "medium"),
-
+    (
+        "generic-secret-assignment",
+        "Hardcoded Secret Assignment",
+        r"(?:secret|password|passwd|token|api_key|apikey|api-key|access_key|auth_token|credentials)"
+        r'\s*[=:]\s*["\'][A-Za-z0-9+/=_\-]{16,}["\']',
+        "medium",
+    ),
+    (
+        "generic-bearer-token",
+        "Hardcoded Bearer Token",
+        r"[Bb]earer\s+[A-Za-z0-9\-._~+/]+=*",
+        "medium",
+    ),
     # Cloud / Infrastructure
-    ("heroku-api-key", "Heroku API Key",
-     r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}', "low"),
-    ("sendgrid-api-key", "SendGrid API Key",
-     r'SG\.[A-Za-z0-9\-_]{22}\.[A-Za-z0-9\-_]{43}', "high"),
-    ("stripe-key", "Stripe API Key",
-     r'(?:sk|pk)_(?:live|test)_[A-Za-z0-9]{24,}', "critical"),
-    ("twilio-key", "Twilio API Key",
-     r'SK[0-9a-fA-F]{32}', "high"),
+    (
+        "heroku-api-key",
+        "Heroku API Key",
+        r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+        "low",
+    ),
+    ("sendgrid-api-key", "SendGrid API Key", r"SG\.[A-Za-z0-9\-_]{22}\.[A-Za-z0-9\-_]{43}", "high"),
+    ("stripe-key", "Stripe API Key", r"(?:sk|pk)_(?:live|test)_[A-Za-z0-9]{24,}", "critical"),
+    ("twilio-key", "Twilio API Key", r"SK[0-9a-fA-F]{32}", "high"),
 ]
 
 # File extensions to skip
 _SKIP_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".svg", ".webp",
-    ".woff", ".woff2", ".ttf", ".eot", ".otf",
-    ".zip", ".tar", ".gz", ".bz2", ".xz", ".7z",
-    ".exe", ".dll", ".so", ".dylib", ".bin",
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx",
-    ".pyc", ".pyo", ".class", ".o", ".obj",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".bmp",
+    ".ico",
+    ".svg",
+    ".webp",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".otf",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".7z",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".bin",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".pyc",
+    ".pyo",
+    ".class",
+    ".o",
+    ".obj",
     ".lock",  # lock files have hashes that trigger false positives
 }
 
 # Directories to skip
 _SKIP_DIRS = {
-    ".git", "node_modules", "vendor", "venv", ".venv", "__pycache__",
-    ".tox", ".mypy_cache", ".pytest_cache", "dist", "build",
-    ".eggs", "*.egg-info", "target", ".gradle",
+    ".git",
+    "node_modules",
+    "vendor",
+    "venv",
+    ".venv",
+    "__pycache__",
+    ".tox",
+    ".mypy_cache",
+    ".pytest_cache",
+    "dist",
+    "build",
+    ".eggs",
+    "*.egg-info",
+    "target",
+    ".gradle",
 }
 
 # Files to skip
 _SKIP_FILES = {
-    "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "Cargo.lock",
-    "go.sum", "poetry.lock", "Gemfile.lock", "composer.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "Cargo.lock",
+    "go.sum",
+    "poetry.lock",
+    "Gemfile.lock",
+    "composer.lock",
 }
 
 
@@ -179,14 +256,16 @@ def scan_secrets(
                 if pattern.search(line):
                     # Redact the match for preview
                     preview = _redact_line(line.strip(), 80)
-                    findings.append(SecretFinding(
-                        file=rel_path,
-                        line_number=line_num,
-                        rule_id=rule_id,
-                        description=desc,
-                        severity=severity,
-                        match_preview=preview,
-                    ))
+                    findings.append(
+                        SecretFinding(
+                            file=rel_path,
+                            line_number=line_num,
+                            rule_id=rule_id,
+                            description=desc,
+                            severity=severity,
+                            match_preview=preview,
+                        )
+                    )
 
     # Deduplicate same rule on same file/line
     seen = set()
@@ -241,7 +320,7 @@ def _redact_line(line: str, max_len: int = 80) -> str:
             return s[:4] + "*" * (len(s) - 8) + s[-4:]
         return s
 
-    return re.sub(r'[A-Za-z0-9+/=_\-]{16,}', redact_match, line)
+    return re.sub(r"[A-Za-z0-9+/=_\-]{16,}", redact_match, line)
 
 
 def _load_ignore_file(path: Path) -> list[str]:

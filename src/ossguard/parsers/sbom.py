@@ -69,12 +69,14 @@ def _parse_cyclonedx(data: dict) -> SBOMInfo:
                 # Try to infer from name patterns
                 ecosystem = _guess_ecosystem(name)
 
-        deps.append(Dependency(
-            name=name,
-            version=version,
-            ecosystem=ecosystem,
-            source_file="sbom (CycloneDX)",
-        ))
+        deps.append(
+            Dependency(
+                name=name,
+                version=version,
+                ecosystem=ecosystem,
+                source_file="sbom (CycloneDX)",
+            )
+        )
 
     return SBOMInfo(
         format="cyclonedx",
@@ -109,12 +111,14 @@ def _parse_spdx(data: dict) -> SBOMInfo:
         if spdx_id == "SPDXRef-DOCUMENT":
             continue
 
-        deps.append(Dependency(
-            name=name,
-            version=version,
-            ecosystem=ecosystem,
-            source_file="sbom (SPDX)",
-        ))
+        deps.append(
+            Dependency(
+                name=name,
+                version=version,
+                ecosystem=ecosystem,
+                source_file="sbom (SPDX)",
+            )
+        )
 
     return SBOMInfo(
         format="spdx",

@@ -1,6 +1,5 @@
 """Tests for the file generators."""
 
-
 from ossguard.generators.security_md import generate_security_md
 from ossguard.generators.scorecard import generate_scorecard_workflow
 from ossguard.generators.dependabot import generate_dependabot_config

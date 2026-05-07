@@ -66,21 +66,25 @@ def _parse_package_json(project_path: Path, deps: list[Dependency]) -> None:
             pkg = json.load(f)
 
         for name, version in pkg.get("dependencies", {}).items():
-            deps.append(Dependency(
-                name=name,
-                version=_clean_version(version),
-                ecosystem="npm",
-                source_file="package.json",
-                is_dev=False,
-            ))
+            deps.append(
+                Dependency(
+                    name=name,
+                    version=_clean_version(version),
+                    ecosystem="npm",
+                    source_file="package.json",
+                    is_dev=False,
+                )
+            )
         for name, version in pkg.get("devDependencies", {}).items():
-            deps.append(Dependency(
-                name=name,
-                version=_clean_version(version),
-                ecosystem="npm",
-                source_file="package.json",
-                is_dev=True,
-            ))
+            deps.append(
+                Dependency(
+                    name=name,
+                    version=_clean_version(version),
+                    ecosystem="npm",
+                    source_file="package.json",
+                    is_dev=True,
+                )
+            )
     except Exception:
         pass
 
@@ -100,18 +104,20 @@ def _parse_requirements_txt(project_path: Path, deps: list[Dependency]) -> None:
                     continue
 
                 # Handle version specifiers: package==1.0, package>=1.0, package~=1.0
-                match = re.match(r'^([a-zA-Z0-9_.-]+)\s*([><=~!]+\s*[\d.*]+)?', line)
+                match = re.match(r"^([a-zA-Z0-9_.-]+)\s*([><=~!]+\s*[\d.*]+)?", line)
                 if match:
                     name = match.group(1)
                     version_spec = match.group(2) or ""
-                    version = re.sub(r'[><=~!]+\s*', '', version_spec).strip()
-                    deps.append(Dependency(
-                        name=name,
-                        version=version,
-                        ecosystem="pypi",
-                        source_file=req_file,
-                        is_dev=is_dev,
-                    ))
+                    version = re.sub(r"[><=~!]+\s*", "", version_spec).strip()
+                    deps.append(
+                        Dependency(
+                            name=name,
+                            version=version,
+                            ecosystem="pypi",
+                            source_file=req_file,
+                            is_dev=is_dev,
+                        )
+                    )
         except Exception:
             pass
 
@@ -168,14 +174,16 @@ def _extract_pyproject_deps(line: str, deps: list[Dependency], is_dev: bool) -> 
     for match in re.finditer(r'"([a-zA-Z0-9_.-]+)(?:\[.*?\])?(?:\s*([><=~!]+\s*[\d.*]+))?', line):
         name = match.group(1)
         version_spec = match.group(2) or ""
-        version = re.sub(r'[><=~!]+\s*', '', version_spec).strip()
-        deps.append(Dependency(
-            name=name,
-            version=version,
-            ecosystem="pypi",
-            source_file="pyproject.toml",
-            is_dev=is_dev,
-        ))
+        version = re.sub(r"[><=~!]+\s*", "", version_spec).strip()
+        deps.append(
+            Dependency(
+                name=name,
+                version=version,
+                ecosystem="pypi",
+                source_file="pyproject.toml",
+                is_dev=is_dev,
+            )
+        )
 
 
 def _parse_go_mod(project_path: Path, deps: list[Dependency]) -> None:
@@ -200,14 +208,16 @@ def _parse_go_mod(project_path: Path, deps: list[Dependency]) -> None:
 
             if in_require or stripped.startswith("require "):
                 # Parse: module/path v1.2.3
-                match = re.match(r'^(?:require\s+)?([a-zA-Z0-9_./-]+)\s+(v[\d.]+)', stripped)
+                match = re.match(r"^(?:require\s+)?([a-zA-Z0-9_./-]+)\s+(v[\d.]+)", stripped)
                 if match:
-                    deps.append(Dependency(
-                        name=match.group(1),
-                        version=match.group(2),
-                        ecosystem="go",
-                        source_file="go.mod",
-                    ))
+                    deps.append(
+                        Dependency(
+                            name=match.group(1),
+                            version=match.group(2),
+                            ecosystem="go",
+                            source_file="go.mod",
+                        )
+                    )
     except Exception:
         pass
 
@@ -242,26 +252,30 @@ def _parse_cargo_toml(project_path: Path, deps: list[Dependency]) -> None:
                 # name = "version" or name = { version = "..." }
                 match = re.match(r'^([a-zA-Z0-9_-]+)\s*=\s*"([\d.*^~]+)"', stripped)
                 if match:
-                    deps.append(Dependency(
-                        name=match.group(1),
-                        version=_clean_version(match.group(2)),
-                        ecosystem="crates.io",
-                        source_file="Cargo.toml",
-                        is_dev=is_dev,
-                    ))
+                    deps.append(
+                        Dependency(
+                            name=match.group(1),
+                            version=_clean_version(match.group(2)),
+                            ecosystem="crates.io",
+                            source_file="Cargo.toml",
+                            is_dev=is_dev,
+                        )
+                    )
                 else:
                     # name = { version = "..." }
                     match = re.match(
                         r'^([a-zA-Z0-9_-]+)\s*=\s*\{.*version\s*=\s*"([\d.*^~]+)"', stripped
                     )
                     if match:
-                        deps.append(Dependency(
-                            name=match.group(1),
-                            version=_clean_version(match.group(2)),
-                            ecosystem="crates.io",
-                            source_file="Cargo.toml",
-                            is_dev=is_dev,
-                        ))
+                        deps.append(
+                            Dependency(
+                                name=match.group(1),
+                                version=_clean_version(match.group(2)),
+                                ecosystem="crates.io",
+                                source_file="Cargo.toml",
+                                is_dev=is_dev,
+                            )
+                        )
     except Exception:
         pass
 
@@ -286,14 +300,16 @@ def _parse_gemfile_lock(project_path: Path, deps: list[Dependency]) -> None:
 
             if in_specs:
                 # Match "    gem-name (1.2.3)"
-                match = re.match(r'^\s{4}([a-zA-Z0-9_.-]+)\s+\(([\d.]+)', line)
+                match = re.match(r"^\s{4}([a-zA-Z0-9_.-]+)\s+\(([\d.]+)", line)
                 if match:
-                    deps.append(Dependency(
-                        name=match.group(1),
-                        version=match.group(2),
-                        ecosystem="rubygems",
-                        source_file="Gemfile.lock",
-                    ))
+                    deps.append(
+                        Dependency(
+                            name=match.group(1),
+                            version=match.group(2),
+                            ecosystem="rubygems",
+                            source_file="Gemfile.lock",
+                        )
+                    )
     except Exception:
         pass
 
@@ -308,22 +324,24 @@ def _parse_pom_xml(project_path: Path, deps: list[Dependency]) -> None:
         content = pom_path.read_text()
         # Simple regex-based parsing for dependency blocks
         dep_pattern = re.compile(
-            r'<dependency>\s*'
-            r'<groupId>([^<]+)</groupId>\s*'
-            r'<artifactId>([^<]+)</artifactId>\s*'
-            r'(?:<version>([^<]+)</version>)?',
+            r"<dependency>\s*"
+            r"<groupId>([^<]+)</groupId>\s*"
+            r"<artifactId>([^<]+)</artifactId>\s*"
+            r"(?:<version>([^<]+)</version>)?",
             re.DOTALL,
         )
         for match in dep_pattern.finditer(content):
             group_id = match.group(1).strip()
             artifact_id = match.group(2).strip()
             version = (match.group(3) or "").strip()
-            deps.append(Dependency(
-                name=f"{group_id}:{artifact_id}",
-                version=version,
-                ecosystem="maven",
-                source_file="pom.xml",
-            ))
+            deps.append(
+                Dependency(
+                    name=f"{group_id}:{artifact_id}",
+                    version=version,
+                    ecosystem="maven",
+                    source_file="pom.xml",
+                )
+            )
     except Exception:
         pass
 
@@ -341,26 +359,30 @@ def _parse_composer_json(project_path: Path, deps: list[Dependency]) -> None:
         for name, version in data.get("require", {}).items():
             if name == "php" or name.startswith("ext-"):
                 continue
-            deps.append(Dependency(
-                name=name,
-                version=_clean_version(version),
-                ecosystem="packagist",
-                source_file="composer.json",
-            ))
+            deps.append(
+                Dependency(
+                    name=name,
+                    version=_clean_version(version),
+                    ecosystem="packagist",
+                    source_file="composer.json",
+                )
+            )
         for name, version in data.get("require-dev", {}).items():
             if name == "php" or name.startswith("ext-"):
                 continue
-            deps.append(Dependency(
-                name=name,
-                version=_clean_version(version),
-                ecosystem="packagist",
-                source_file="composer.json",
-                is_dev=True,
-            ))
+            deps.append(
+                Dependency(
+                    name=name,
+                    version=_clean_version(version),
+                    ecosystem="packagist",
+                    source_file="composer.json",
+                    is_dev=True,
+                )
+            )
     except Exception:
         pass
 
 
 def _clean_version(version: str) -> str:
     """Clean version specifiers (^, ~, >=, etc.) to get a bare version."""
-    return re.sub(r'^[\^~>=<!\s*]+', '', version).strip()
+    return re.sub(r"^[\^~>=<!\s*]+", "", version).strip()

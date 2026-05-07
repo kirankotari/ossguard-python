@@ -119,11 +119,13 @@ def analyze_drift(
     # Find removed dependencies
     for key, old_dep in old_map.items():
         if key not in new_map:
-            entries.append(DriftEntry(
-                change_type="removed",
-                dep=old_dep,
-                old_version=old_dep.version,
-            ))
+            entries.append(
+                DriftEntry(
+                    change_type="removed",
+                    dep=old_dep,
+                    old_version=old_dep.version,
+                )
+            )
 
     # Check vulnerabilities on new/changed deps
     new_vulns = 0
@@ -173,5 +175,6 @@ def _classify_version_change(old_ver: str, new_ver: str) -> str:
 def _version_tuple(version: str) -> tuple[int, ...]:
     """Convert a version string to a comparable tuple."""
     import re
-    parts = re.findall(r'\d+', version)
+
+    parts = re.findall(r"\d+", version)
     return tuple(int(p) for p in parts) if parts else (0,)

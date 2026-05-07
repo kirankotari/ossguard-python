@@ -39,39 +39,30 @@ _PRACTICES: list[tuple[str, int, str, str]] = [
     ("S2C2F-ING-1", 1, "Ingest", "Use package managers to consume OSS (not copy-paste)"),
     ("S2C2F-ING-2", 1, "Ingest", "Track all OSS dependencies in a manifest file"),
     ("S2C2F-ING-3", 1, "Ingest", "Use an automated dependency update tool"),
-
     # Level 1 — Scan
     ("S2C2F-SCN-1", 1, "Scan", "Scan OSS for known vulnerabilities"),
     ("S2C2F-SCN-2", 1, "Scan", "Scan OSS for license compliance"),
-
     # Level 2 — Inventory
     ("S2C2F-INV-1", 2, "Inventory", "Maintain an inventory (SBOM) of all OSS consumed"),
     ("S2C2F-INV-2", 2, "Inventory", "Track transitive dependencies"),
-
     # Level 2 — Update
     ("S2C2F-UPD-1", 2, "Update", "Apply security patches within defined SLAs"),
     ("S2C2F-UPD-2", 2, "Update", "Automate dependency updates for security fixes"),
-
     # Level 2 — Enforce
     ("S2C2F-ENF-1", 2, "Enforce", "Block known-vulnerable components from being used"),
     ("S2C2F-ENF-2", 2, "Enforce", "Enforce license compliance policies"),
-
     # Level 3 — Audit
     ("S2C2F-AUD-1", 3, "Audit", "Perform security audit of critical OSS dependencies"),
     ("S2C2F-AUD-2", 3, "Audit", "Verify provenance of OSS packages"),
-
     # Level 3 — Fix
     ("S2C2F-FIX-1", 3, "Fix", "Ability to privately patch critical OSS vulnerabilities"),
     ("S2C2F-FIX-2", 3, "Fix", "Contribute security fixes upstream"),
-
     # Level 3 — Verify
     ("S2C2F-VER-1", 3, "Verify", "Verify signatures on consumed OSS packages"),
     ("S2C2F-VER-2", 3, "Verify", "Validate SBOM accuracy"),
-
     # Level 4 — Rebuild
     ("S2C2F-REB-1", 4, "Rebuild", "Rebuild OSS from source in a controlled environment"),
     ("S2C2F-REB-2", 4, "Rebuild", "Verify reproducibility of builds"),
-
     # Level 4 — Secure
     ("S2C2F-SEC-1", 4, "Secure", "Run OSS in sandboxed environments"),
     ("S2C2F-SEC-2", 4, "Secure", "Apply runtime protection and monitoring"),
@@ -94,11 +85,17 @@ def assess_maturity(project_path: str | Path) -> MaturityReport:
 
     for prac_id, level, category, description in _PRACTICES:
         status, evidence, rec = _check_practice(prac_id, info, path)
-        practices.append(S2C2FPractice(
-            id=prac_id, level=level, category=category,
-            description=description, status=status,
-            evidence=evidence, recommendation=rec,
-        ))
+        practices.append(
+            S2C2FPractice(
+                id=prac_id,
+                level=level,
+                category=category,
+                description=description,
+                status=status,
+                evidence=evidence,
+                recommendation=rec,
+            )
+        )
 
     # Calculate level percentages
     for lvl in range(1, 5):
@@ -140,16 +137,31 @@ def _check_practice(prac_id: str, info: ProjectInfo, path: Path) -> tuple[str, s
 
     # Level 1 — Ingest
     if prac_id == "S2C2F-ING-1":
-        manifests = ["package.json", "requirements.txt", "pyproject.toml", "go.mod",
-                      "Cargo.toml", "pom.xml", "composer.json", "Gemfile"]
+        manifests = [
+            "package.json",
+            "requirements.txt",
+            "pyproject.toml",
+            "go.mod",
+            "Cargo.toml",
+            "pom.xml",
+            "composer.json",
+            "Gemfile",
+        ]
         for m in manifests:
             if (path / m).exists():
                 return "met", f"Package manifest found: {m}", ""
         return "unmet", "", "Use a package manager with a manifest file"
 
     if prac_id == "S2C2F-ING-2":
-        manifests = ["package.json", "requirements.txt", "pyproject.toml", "go.mod",
-                      "Cargo.toml", "pom.xml", "composer.json"]
+        manifests = [
+            "package.json",
+            "requirements.txt",
+            "pyproject.toml",
+            "go.mod",
+            "Cargo.toml",
+            "pom.xml",
+            "composer.json",
+        ]
         found = [m for m in manifests if (path / m).exists()]
         if found:
             return "met", f"Dependency manifests: {', '.join(found)}", ""
@@ -190,8 +202,15 @@ def _check_practice(prac_id: str, info: ProjectInfo, path: Path) -> tuple[str, s
         return "unmet", "", "Generate SBOMs — run `ossguard sbom`"
 
     if prac_id == "S2C2F-INV-2":
-        lock_files = ["package-lock.json", "yarn.lock", "poetry.lock",
-                       "Cargo.lock", "go.sum", "Gemfile.lock", "composer.lock"]
+        lock_files = [
+            "package-lock.json",
+            "yarn.lock",
+            "poetry.lock",
+            "Cargo.lock",
+            "go.sum",
+            "Gemfile.lock",
+            "composer.lock",
+        ]
         for lf in lock_files:
             if (path / lf).exists():
                 return "met", f"Lock file tracks transitive deps: {lf}", ""

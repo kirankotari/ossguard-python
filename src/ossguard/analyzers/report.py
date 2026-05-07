@@ -69,8 +69,11 @@ def _generate_json_report(audit: AuditReport) -> str:
 def _generate_html_report(audit: AuditReport) -> str:
     """Generate HTML compliance report."""
     grade_color = {
-        "A": "#22c55e", "B": "#84cc16", "C": "#eab308",
-        "D": "#f97316", "F": "#ef4444",
+        "A": "#22c55e",
+        "B": "#84cc16",
+        "C": "#eab308",
+        "D": "#f97316",
+        "F": "#ef4444",
     }.get(audit.overall_grade, "#6b7280")
 
     # Config items
@@ -89,7 +92,9 @@ def _generate_html_report(audit: AuditReport) -> str:
             icon = "&#9989;" if configured else "&#10060;"
             status = "Configured" if configured else "Missing"
             color = "#22c55e" if configured else "#ef4444"
-            config_rows += f'<tr><td>{name}</td><td style="color:{color}">{icon} {status}</td></tr>\n'
+            config_rows += (
+                f'<tr><td>{name}</td><td style="color:{color}">{icon} {status}</td></tr>\n'
+            )
 
     # Dep health section
     dep_section = ""
@@ -104,11 +109,11 @@ def _generate_html_report(audit: AuditReport) -> str:
           <span class="metric-label">Dependencies</span>
         </div>
         <div class="metric">
-          <span class="metric-value" style="color: {'#22c55e' if dh.aggregate_score >= 8 else '#eab308' if dh.aggregate_score >= 5 else '#ef4444'}">{dh.aggregate_score}/10</span>
+          <span class="metric-value" style="color: {"#22c55e" if dh.aggregate_score >= 8 else "#eab308" if dh.aggregate_score >= 5 else "#ef4444"}">{dh.aggregate_score}/10</span>
           <span class="metric-label">Health Score</span>
         </div>
         <div class="metric">
-          <span class="metric-value" style="color: {'#22c55e' if dh.total_vulns == 0 else '#ef4444'}">{dh.total_vulns}</span>
+          <span class="metric-value" style="color: {"#22c55e" if dh.total_vulns == 0 else "#ef4444"}">{dh.total_vulns}</span>
           <span class="metric-label">Vulnerabilities</span>
         </div>
         <div class="metric">
@@ -149,8 +154,16 @@ def _generate_html_report(audit: AuditReport) -> str:
     </div>"""
 
     # Findings & recommendations
-    findings_html = "".join(f"<li>{f}</li>" for f in audit.findings) if audit.findings else "<li>No issues found</li>"
-    recs_html = "".join(f"<li>{r}</li>" for r in audit.recommendations) if audit.recommendations else "<li>No recommendations</li>"
+    findings_html = (
+        "".join(f"<li>{f}</li>" for f in audit.findings)
+        if audit.findings
+        else "<li>No issues found</li>"
+    )
+    recs_html = (
+        "".join(f"<li>{r}</li>" for r in audit.recommendations)
+        if audit.recommendations
+        else "<li>No recommendations</li>"
+    )
 
     project_name = audit.project_info.repo_name if audit.project_info else "Unknown Project"
 

@@ -57,76 +57,96 @@ def compare_projects(
     metrics: list[CompareMetric] = []
 
     # Overall Grade
-    metrics.append(_compare_grades(
-        "Overall Grade", audit_a.overall_grade, audit_b.overall_grade,
-    ))
+    metrics.append(
+        _compare_grades(
+            "Overall Grade",
+            audit_a.overall_grade,
+            audit_b.overall_grade,
+        )
+    )
 
     # Config Score
-    metrics.append(_compare_numeric(
-        "Config Score",
-        audit_a.config_score, audit_a.config_total,
-        audit_b.config_score, audit_b.config_total,
-        higher_is_better=True,
-    ))
+    metrics.append(
+        _compare_numeric(
+            "Config Score",
+            audit_a.config_score,
+            audit_a.config_total,
+            audit_b.config_score,
+            audit_b.config_total,
+            higher_is_better=True,
+        )
+    )
 
     # Dependency Health
     if audit_a.dep_health or audit_b.dep_health:
         a_score = audit_a.dep_health.aggregate_score if audit_a.dep_health else 0
         b_score = audit_b.dep_health.aggregate_score if audit_b.dep_health else 0
-        metrics.append(CompareMetric(
-            name="Dep Health Score",
-            project_a_value=f"{a_score}/10",
-            project_b_value=f"{b_score}/10",
-            winner="a" if a_score > b_score else "b" if b_score > a_score else "tie",
-        ))
+        metrics.append(
+            CompareMetric(
+                name="Dep Health Score",
+                project_a_value=f"{a_score}/10",
+                project_b_value=f"{b_score}/10",
+                winner="a" if a_score > b_score else "b" if b_score > a_score else "tie",
+            )
+        )
 
         a_vulns = audit_a.dep_health.total_vulns if audit_a.dep_health else 0
         b_vulns = audit_b.dep_health.total_vulns if audit_b.dep_health else 0
-        metrics.append(CompareMetric(
-            name="Total Vulnerabilities",
-            project_a_value=str(a_vulns),
-            project_b_value=str(b_vulns),
-            winner="a" if a_vulns < b_vulns else "b" if b_vulns < a_vulns else "tie",
-        ))
+        metrics.append(
+            CompareMetric(
+                name="Total Vulnerabilities",
+                project_a_value=str(a_vulns),
+                project_b_value=str(b_vulns),
+                winner="a" if a_vulns < b_vulns else "b" if b_vulns < a_vulns else "tie",
+            )
+        )
 
         a_crit = audit_a.dep_health.critical_vulns if audit_a.dep_health else 0
         b_crit = audit_b.dep_health.critical_vulns if audit_b.dep_health else 0
-        metrics.append(CompareMetric(
-            name="Critical Vulns",
-            project_a_value=str(a_crit),
-            project_b_value=str(b_crit),
-            winner="a" if a_crit < b_crit else "b" if b_crit < a_crit else "tie",
-        ))
+        metrics.append(
+            CompareMetric(
+                name="Critical Vulns",
+                project_a_value=str(a_crit),
+                project_b_value=str(b_crit),
+                winner="a" if a_crit < b_crit else "b" if b_crit < a_crit else "tie",
+            )
+        )
 
         a_deps = audit_a.dep_health.total_deps if audit_a.dep_health else 0
         b_deps = audit_b.dep_health.total_deps if audit_b.dep_health else 0
-        metrics.append(CompareMetric(
-            name="Total Dependencies",
-            project_a_value=str(a_deps),
-            project_b_value=str(b_deps),
-            winner="",  # Neutral — fewer isn't necessarily better
-        ))
+        metrics.append(
+            CompareMetric(
+                name="Total Dependencies",
+                project_a_value=str(a_deps),
+                project_b_value=str(b_deps),
+                winner="",  # Neutral — fewer isn't necessarily better
+            )
+        )
 
     # Reachability
     if audit_a.reachability or audit_b.reachability:
         a_rv = audit_a.reachability.reachable_vulns if audit_a.reachability else 0
         b_rv = audit_b.reachability.reachable_vulns if audit_b.reachability else 0
-        metrics.append(CompareMetric(
-            name="Reachable Vulns",
-            project_a_value=str(a_rv),
-            project_b_value=str(b_rv),
-            winner="a" if a_rv < b_rv else "b" if b_rv < a_rv else "tie",
-        ))
+        metrics.append(
+            CompareMetric(
+                name="Reachable Vulns",
+                project_a_value=str(a_rv),
+                project_b_value=str(b_rv),
+                winner="a" if a_rv < b_rv else "b" if b_rv < a_rv else "tie",
+            )
+        )
 
     # Findings count
     a_findings = len(audit_a.findings)
     b_findings = len(audit_b.findings)
-    metrics.append(CompareMetric(
-        name="Findings",
-        project_a_value=str(a_findings),
-        project_b_value=str(b_findings),
-        winner="a" if a_findings < b_findings else "b" if b_findings < a_findings else "tie",
-    ))
+    metrics.append(
+        CompareMetric(
+            name="Findings",
+            project_a_value=str(a_findings),
+            project_b_value=str(b_findings),
+            winner="a" if a_findings < b_findings else "b" if b_findings < a_findings else "tie",
+        )
+    )
 
     # Determine overall winner
     a_wins = sum(1 for m in metrics if m.winner == "a")
@@ -159,7 +179,11 @@ def _compare_grades(name: str, grade_a: str, grade_b: str) -> CompareMetric:
 
 
 def _compare_numeric(
-    name: str, a_val: int, a_total: int, b_val: int, b_total: int,
+    name: str,
+    a_val: int,
+    a_total: int,
+    b_val: int,
+    b_total: int,
     higher_is_better: bool = True,
 ) -> CompareMetric:
     """Compare numeric scores."""

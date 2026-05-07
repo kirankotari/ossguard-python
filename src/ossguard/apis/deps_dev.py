@@ -177,9 +177,7 @@ class DepsDevClient:
             repo_url=repo_url,
         )
 
-    def get_package_batch(
-        self, packages: list[tuple[str, str, str]]
-    ) -> dict[str, PackageInfo]:
+    def get_package_batch(self, packages: list[tuple[str, str, str]]) -> dict[str, PackageInfo]:
         """Get metadata for multiple packages. Returns dict mapping name to PackageInfo."""
         results = {}
         for name, version, ecosystem in packages:
@@ -198,7 +196,7 @@ def _normalize_repo_url(url: str) -> str:
     # Handle github.com URLs
     for prefix in ["https://", "http://", "git://", "ssh://git@"]:
         if url.startswith(prefix):
-            url = url[len(prefix):]
+            url = url[len(prefix) :]
             break
 
     # Remove .git suffix
