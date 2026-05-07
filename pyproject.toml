@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ossguard"
+version = "0.1.0"
+description = "One-command CLI to guard any OSS project with OpenSSF security best practices — bootstrap, scan, and monitor."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "OSSGuard Contributors"}
+]
+keywords = ["openssf", "security", "supply-chain", "scorecard", "slsa", "sbom", "ossguard"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+    "Topic :: Software Development :: Build Tools",
+]
+dependencies = [
+    "typer[all]>=0.9.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+    "questionary>=2.0.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+ossguard = "ossguard.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/kirankotari/ossguard"
+Repository = "https://github.com/kirankotari/ossguard"
+Issues = "https://github.com/kirankotari/ossguard/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"

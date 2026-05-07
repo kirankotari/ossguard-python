@@ -1,0 +1,48 @@
+# Sigstore Signing - Cryptographic signing for Python releases
+# https://docs.sigstore.dev/
+# Signs your Python package distributions using Sigstore's keyless signing,
+# providing verifiable provenance for your releases.
+
+name: Sign Release (Sigstore)
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write  # Required for Sigstore OIDC
+
+jobs:
+  sign:
+    name: Sign Python Distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install build dependencies
+        run: pip install build
+
+      - name: Build distribution
+        run: python -m build
+
+      - name: Sign with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3
+        with:
+          inputs: ./dist/*.tar.gz ./dist/*.whl
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-dist
+          path: |
+            dist/*.tar.gz
+            dist/*.whl
+            dist/*.sigstore.json

@@ -1,0 +1,61 @@
+"""Generate OpenSSF Scorecard GitHub Action workflow."""
+
+from __future__ import annotations
+
+
+def generate_scorecard_workflow() -> str:
+    """Generate a GitHub Actions workflow for OpenSSF Scorecard.
+
+    Reference: https://github.com/ossf/scorecard-action
+    """
+    return """# OpenSSF Scorecard - Automated security assessment
+# https://github.com/ossf/scorecard-action
+# This workflow runs the OpenSSF Scorecard on your repository and uploads
+# results to GitHub's Security tab and the OpenSSF Scorecard API.
+
+name: OpenSSF Scorecard
+
+on:
+  # Run on main/default branch changes
+  branch_protection_rule:
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  push:
+    branches: [ "main", "master" ]
+
+# Declare default permissions as read only
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed for Code Scanning upload
+      security-events: write
+      # Needed for SARIF upload
+      id-token: write
+      # Needed for repository read
+      contents: read
+      actions: read
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: "Run Scorecard"
+        uses: ossf/scorecard-action@v2
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # Publish results to the OpenSSF REST API
+          publish_results: true
+
+      - name: "Upload SARIF to GitHub Security tab"
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+"""
