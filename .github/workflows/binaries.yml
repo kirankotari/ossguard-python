@@ -13,28 +13,18 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact: ossguard-linux-amd64
-            npm_pkg: cli-linux-x64
-            npm_bin: ossguard
             pyinstaller_args: ""
           - os: ubuntu-24.04-arm
             artifact: ossguard-linux-arm64
-            npm_pkg: cli-linux-arm64
-            npm_bin: ossguard
             pyinstaller_args: ""
           - os: macos-13
             artifact: ossguard-macos-x64
-            npm_pkg: cli-darwin-x64
-            npm_bin: ossguard
             pyinstaller_args: ""
           - os: macos-latest
             artifact: ossguard-macos-arm64
-            npm_pkg: cli-darwin-arm64
-            npm_bin: ossguard
             pyinstaller_args: ""
           - os: windows-latest
             artifact: ossguard-windows-amd64.exe
-            npm_pkg: cli-win32-x64
-            npm_bin: ossguard.exe
             pyinstaller_args: ""
 
     runs-on: ${{ matrix.os }}
@@ -77,19 +67,6 @@ jobs:
           name: ${{ matrix.artifact }}
           path: dist/${{ matrix.artifact }}
 
-      - name: Prepare npm platform package
-        run: |
-          mkdir -p npm-pkg/bin
-          cp "dist/${{ matrix.artifact }}" "npm-pkg/bin/${{ matrix.npm_bin }}"
-          cp "npm/@ossguard/${{ matrix.npm_pkg }}/package.json" npm-pkg/package.json
-        shell: bash
-
-      - name: Upload npm package
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: npm-${{ matrix.npm_pkg }}
-          path: npm-pkg/
-
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -113,3 +90,12 @@ jobs:
         with:
           files: release/*
           fail_on_unmatched_files: false
+
+      - name: Trigger npm publish
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh api repos/kirankotari/ossguard-npm/dispatches \
+            -f event_type=publish-npm \
+            -f "client_payload[version]=$VERSION"
+        env:
+          GH_TOKEN: ${{ secrets.NPM_DISPATCH_TOKEN }}
