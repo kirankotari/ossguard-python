@@ -1,0 +1,13 @@
+{
+  "name": "@ossguard/cli-linux-x64",
+  "version": "0.1.0",
+  "description": "ossguard pre-built binary for Linux x64",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kirankotari/ossguard.git"
+  },
+  "os": ["linux"],
+  "cpu": ["x64"],
+  "files": ["bin/ossguard"]
+}
